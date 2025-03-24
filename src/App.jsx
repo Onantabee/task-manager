@@ -3,8 +3,9 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom"; // Im
 import Layout from "./components/Layout";
 import RegistrationForm from "./components/RegistrationForm";
 import ChooseRole from "./components/ChooseRole";
-import Home from "./Home";
+import Home from "./pages/Home";
 import { AuthProvider } from "./AuthProvider";
+import Task from "./pages/Task";
 
 function App() {
   const [isSignup, setIsSignup] = useState(false);
@@ -20,6 +21,7 @@ function App() {
             />
             <Route path="/choose-role" element={<ChooseRole />} />
             <Route path="/home" element={<Home />} />
+            <Route path="/task/:taskId" element={<Task />} />
           </Routes>
         </Layout>
       </Router>

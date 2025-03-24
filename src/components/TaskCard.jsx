@@ -18,9 +18,10 @@ import {
   LowPriority as LowPriorityIcon,
   HourglassEmpty as HourglassEmptyIcon,
   Info as StatusIcon,
+  Visibility as ViewIcon,
 } from "@mui/icons-material";
 
-const TaskCard = ({ task, onEdit, onDelete, isAdmin }) => {
+const TaskCard = ({ task, onEdit, onDelete, onView, isAdmin, assignee, createdBy}) => {
   const { title, priority, dueDate, taskStatus } = task;
 
   const priorityIcons = {
@@ -32,7 +33,7 @@ const TaskCard = ({ task, onEdit, onDelete, isAdmin }) => {
   return (
     <Card
       sx={{
-        maxWidth: 360,
+        minWidth: "100%",
         borderRadius: 3,
         boxShadow: 6,
         backgroundColor: "#1f1f1f",
@@ -40,14 +41,19 @@ const TaskCard = ({ task, onEdit, onDelete, isAdmin }) => {
         transition: "transform 0.2s, box-shadow 0.2s",
         border: "1px solid #404040",
         "&:hover": {
-          transform: "scale(1.03)",
           boxShadow: 10,
         },
         padding: 2,
       }}
     >
       <CardContent>
-        <Typography variant="h6" gutterBottom fontWeight="bold" color="primary">
+        <Typography 
+          variant="h6" 
+          gutterBottom 
+          fontWeight="bold" 
+          color="primary"
+          sx={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+        >
           {title}
         </Typography>
 
@@ -80,12 +86,21 @@ const TaskCard = ({ task, onEdit, onDelete, isAdmin }) => {
           />
         </Stack>
 
-        <Stack direction="row" spacing={1} alignItems="center" mb={2}>
+        {isAdmin? (
+          <Stack direction="row" spacing={1} alignItems="center" mb={2}>
           <AssigneeIcon fontSize="small" color="action" />
           <Typography variant="body2" color="textSecondary">
-            Assignee: <strong>{"assignee"}</strong>
+            Assignee: <strong>{assignee}</strong>
           </Typography>
         </Stack>
+        ):(
+          <Stack direction="row" spacing={1} alignItems="center" mb={2}>
+          <AssigneeIcon fontSize="small" color="action" />
+          <Typography variant="body2" color="textSecondary">
+            Created by: <strong>{createdBy}</strong>
+          </Typography>
+        </Stack>
+        )}
 
         {isAdmin && (
           <>
@@ -94,18 +109,24 @@ const TaskCard = ({ task, onEdit, onDelete, isAdmin }) => {
               <Stack direction="row" spacing={1}>
                 <Button
                   variant="outlined"
-                  startIcon={<EditIcon />}
-                  onClick={onEdit}
+                  color="primary"
+                  onClick={onView}
+                  sx={{ display: "flex", justifyContent: "center", alignItems: "center", minWidth: "40px" }}
                 >
-                  Edit
+                  <ViewIcon />
                 </Button>
                 <Button
                   variant="outlined"
-                  startIcon={<DeleteIcon />}
+                  onClick={onEdit}
+                >
+                  <EditIcon />
+                </Button>
+                <Button
+                  variant="outlined"
                   color="error"
                   onClick={onDelete}
                 >
-                  Delete
+                  <DeleteIcon />
                 </Button>
               </Stack>
             </Box>
