@@ -15,13 +15,14 @@ export default function Task() {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const commentInputRef = useRef(null); 
+  const commentContainerRef = useRef(null);
 
   const fetchComment = useCallback(async () => {
     try {
       const res = await axios.get(
         `http://localhost:8080/comment/task/${state.task.id}`
       );
-      setComments(res.data);
+      setComments(res.data.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)));
     } catch (error) {
       console.error("Error fetching comments:", error);
     }
@@ -78,6 +79,14 @@ export default function Task() {
       fetchComment();
     }
   }, [state?.task?.id, fetchComment]);
+
+  useEffect(() => {
+    if (commentContainerRef.current) {
+      setTimeout(() => {
+        commentContainerRef.current.scrollTop = commentContainerRef.current.scrollHeight;
+      }, 100);
+    }
+  }, [comments]);
 
   const addComment = async () => {
     if (!user) return;
@@ -213,11 +222,14 @@ export default function Task() {
         </div>
         <div className="mt-2">
           <h2 className="text-lg font-semibold text-gray-300">Comments</h2>
-          <div className="space-y-2 mt-3 min-h-[265px] max-h-[265px] px-5 overflow-scroll ">
+          <div
+            ref={commentContainerRef}
+            className="space-y-2 mt-3 min-h-[265px] max-h-[265px] px-5 overflow-y-auto"
+          >
             {comments.length === 0 ? (
               <p className="text-gray-400">No comments yet.</p>
             ) : (
-              comments.map((comment) => (
+              [...comments].map((comment) => (
                 <div key={comment.id}>
                   <div
                     className={`px-3 pb-3 rounded-lg ${
