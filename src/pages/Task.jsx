@@ -1,10 +1,11 @@
 import { useLocation } from "react-router-dom";
 import axios from "axios";
 import { useState, useEffect, useCallback, useRef } from "react";
+import useWebSocket from "../hooks/useWebSocket";
 
 export default function Task() {
   const { state } = useLocation();
-
+  const { messages, sendMessage } = useWebSocket();
   const isAdmin = state?.isAdmin || false;
   const [user, setUser] = useState(state?.user || null);
   const [author, setAuthor] = useState({});
@@ -81,6 +82,15 @@ export default function Task() {
   }, [state?.task?.id, fetchComment]);
 
   useEffect(() => {
+    setComments((prev) => {
+        const uniqueComments = new Map(prev.map((comment) => [comment.id, comment]));
+        messages.forEach((msg) => uniqueComments.set(msg.id, msg));
+        return Array.from(uniqueComments.values());
+    });
+}, [messages]);
+
+
+  useEffect(() => {
     if (commentContainerRef.current) {
       setTimeout(() => {
         commentContainerRef.current.scrollTop = commentContainerRef.current.scrollHeight;
@@ -91,24 +101,26 @@ export default function Task() {
   const addComment = async () => {
     if (!user) return;
     try {
-      const res = await axios.post(
-        `http://localhost:8080/comment/task/${state.task.id}`,
-        {
-          authorEmail: user.email,
-          content: newComment,
-          recipientEmail: task.assigneeId || null,
+        const res = await axios.post(
+            `http://localhost:8080/comment/task/${state.task.id}`,
+            {
+                authorEmail: user.email,
+                content: newComment,
+                recipientEmail: task.assigneeId || null,
+            }
+        );
+
+        sendMessage(res.data);
+        setNewComment("");
+
+        if (commentInputRef.current) {
+            commentInputRef.current.innerText = "";
+            commentInputRef.current.dataset.placeholder = "Add a comment...";
         }
-      );
-      setNewComment("");
-      if (commentInputRef.current) {
-        commentInputRef.current.innerText = "";
-        commentInputRef.current.dataset.placeholder = "Add a comment..."; 
-      }
-      fetchComment();
     } catch (error) {
-      console.error("Error adding comment", error);
+        console.error("Error adding comment", error);
     }
-  };
+};
 
   const statusColors = {
     PENDING: "bg-yellow-500/50",
@@ -179,7 +191,7 @@ export default function Task() {
               <strong className="text-gray-300">Status:</strong>
               {isAdmin ? (
                 <span
-                  className={` rounded-full text-sm font-medium py-2 px-4 border-none focus:outline-none transition-all ${statusColors[taskStatus]} relative z-10`}
+                  className={` rounded-full text-sm font-medium py-2 px-4 border-none focus:outline-none transition-all ${statusColors[taskStatus]}`}
                 >
                   {taskStatus}
                 </span>
