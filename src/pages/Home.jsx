@@ -15,7 +15,14 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function Home() {
-  const darkTheme = createTheme({palette: { mode: "dark", background: {paper: "#121212", }, text: {primary: "#ffffff", }, divider: "#424242",},});
+  const darkTheme = createTheme({
+    palette: {
+      mode: "dark",
+      background: { paper: "#121212" },
+      text: { primary: "#ffffff" },
+      divider: "#424242",
+    },
+  });
   const { userEmail } = useAuth();
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -93,7 +100,19 @@ export default function Home() {
 
   return (
     <ThemeProvider theme={darkTheme}>
-      <div className="py-10">
+      {isAdmin && (
+        <div className="w-full py-8 flex justify-center items-center">
+          <div className="w-[35rem] px-5 bg-[#4d4d4d] rounded-2xl">
+            <input
+              type="text"
+              className="text-lg w-full text-gray-300 py-2 focus:outline-0"
+              name=""
+              id=""
+            />
+          </div>
+        </div>
+      )}
+      <div className="pb-8">
         {isAdmin && (
           <Button
             size="small"
@@ -133,7 +152,7 @@ export default function Home() {
         )}
       </div>
 
-      <div className="text-5xl text-white">
+      <div className="text-2xl text-gray-400">
         Welcome, {user ? user.name : "Guest"}
       </div>
 

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -20,6 +20,7 @@ import {
   Info as StatusIcon,
   Visibility as ViewIcon,
 } from "@mui/icons-material";
+import axios from "axios";
 
 const TaskCard = ({ task, onEdit, onDelete, onView, isAdmin, assignee, createdBy}) => {
   const { title, priority, dueDate, taskStatus } = task;
@@ -29,6 +30,35 @@ const TaskCard = ({ task, onEdit, onDelete, onView, isAdmin, assignee, createdBy
     Medium: { color: "warning", icon: <HourglassEmptyIcon color="warning" /> },
     Low: { color: "success", icon: <LowPriorityIcon color="success" /> },
   };
+
+  const [adminUser, setAdminUser] = useState("");
+  const [emoployeeUser, setEmployeeUser] = useState("");
+
+  useEffect( () => {
+    const fetchCreatorName = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:8080/users/${createdBy}`
+        );
+        setAdminUser(res.data);
+      } catch (error) {
+        console.error("Error fetching author:", error);
+      }
+    }
+
+    const fetchAssigneeName = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:8080/users/${assignee}`
+        );
+        setEmployeeUser(res.data);
+      } catch (error) {
+        console.error("Error fetching author:", error);
+      }
+    }
+    fetchCreatorName()
+    fetchAssigneeName()
+  }, [createdBy, assignee])
 
   return (
     <Card
@@ -43,21 +73,17 @@ const TaskCard = ({ task, onEdit, onDelete, onView, isAdmin, assignee, createdBy
         "&:hover": {
           boxShadow: 10,
         },
-        padding: 2,
       }}
     >
       <CardContent>
         <Typography 
           variant="h6" 
           gutterBottom 
-          fontWeight="bold" 
-          color="primary"
-          sx={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+          fontWeight="bold"
+          sx={{ whiteSpace: "nowrap", color:"#f0bbb5", overflow: "hidden", textOverflow: "ellipsis", background: "#333333", borderRadius: "5px", marginBottom: "12px", padding: "8px 8px" }}
         >
           {title}
         </Typography>
-
-        <Divider sx={{ backgroundColor: "#505050", marginY: 1 }} />
 
         <Stack direction="row" spacing={1} alignItems="center" mb={1}>
           <DueDateIcon fontSize="small" color="action" />
@@ -90,14 +116,14 @@ const TaskCard = ({ task, onEdit, onDelete, onView, isAdmin, assignee, createdBy
           <Stack direction="row" spacing={1} alignItems="center" mb={2}>
           <AssigneeIcon fontSize="small" color="action" />
           <Typography variant="body2" color="textSecondary">
-            Assignee: <strong>{assignee}</strong>
+            Assignee: <strong>{emoployeeUser.name}</strong>
           </Typography>
         </Stack>
         ):(
           <Stack direction="row" spacing={1} alignItems="center" mb={2}>
           <AssigneeIcon fontSize="small" color="action" />
           <Typography variant="body2" color="textSecondary">
-            Created by: <strong>{createdBy}</strong>
+            Created by: <strong>{adminUser.name}</strong>
           </Typography>
         </Stack>
         )}

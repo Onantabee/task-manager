@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 
-const useWebSocket = () => {
+export default function useWebSocket() {
     const [client, setClient] = useState(null);
     const [messages, setMessages] = useState([]);
     const [isConnected, setIsConnected] = useState(false);
@@ -91,5 +91,3 @@ const useWebSocket = () => {
         reconnect: connect
     };
 };
-
-export default useWebSocket;
