@@ -13,6 +13,7 @@ import TaskDialog from "../components/TaskDialog.jsx";
 import { useAuth } from "../AuthProvider.jsx";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
+import useWebSocket from "../hooks/useWebSocket.js";
 
 export default function Home() {
   const darkTheme = createTheme({
@@ -27,6 +28,7 @@ export default function Home() {
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [tasks, setTasks] = useState([]);
+  const { tasks: wsTasks, isConnected } = useWebSocket();
   const [nonAdminUsers, setNonAdminUsers] = useState([]);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -61,10 +63,31 @@ export default function Home() {
     fetchData();
   }, [userEmail]);
 
+  useEffect(() => {
+  if (wsTasks.length > 0) {
+    setTasks(prevTasks => {
+      const taskMap = new Map(prevTasks.map(task => [String(task.id), task]));
+      
+      wsTasks.forEach(wsTask => {
+        const taskId = String(wsTask.id);
+        if (wsTask.deleted) {
+          taskMap.delete(taskId);
+        } else {
+          taskMap.set(taskId, { ...taskMap.get(taskId), ...wsTask });
+        }
+      });
+      
+      return Array.from(taskMap.values());
+    });
+  }
+}, [wsTasks]);
+
   const fetchTasks = async () => {
     try {
       const tasksResponse = await axios.get("http://localhost:8080/task");
-      setTasks(tasksResponse.data);
+      if (!isConnected || wsTasks.length === 0) {
+        setTasks(tasksResponse.data);
+      }
     } catch (error) {
       console.error("Error fetching tasks:", error);
       showSnackbar("Failed to fetch tasks. Please try again.", "error");
@@ -84,9 +107,9 @@ export default function Home() {
   const handleDeleteTask = async (id) => {
     try {
       await axios.delete(`http://localhost:8080/task/${id}`);
-      setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
       showSnackbar("Task deleted successfully!", "success");
     } catch (error) {
+      fetchTasks();
       console.error("Error deleting task:", error);
       showSnackbar("Failed to delete task. Please try again.", "error");
     }
@@ -151,6 +174,11 @@ export default function Home() {
           </Button>
         )}
       </div>
+      {/* {!isConnected && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          Real-time updates disconnected. Changes may not appear immediately.
+        </Alert>
+      )} */}
 
       <div className="text-2xl text-gray-400">
         Welcome, {user ? user.name : "Guest"}

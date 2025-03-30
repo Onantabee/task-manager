@@ -12,6 +12,7 @@ import {
   Button,
 } from "@mui/material";
 import axios from "axios";
+import useWebSocket from "../hooks/useWebSocket";
 
 const sxStyles = {
   "& .MuiOutlinedInput-root": {
@@ -41,6 +42,8 @@ const TaskDialog = ({
     taskStatus: "PENDING",
     assigneeId: "",
   });
+
+  const { sendTask, sendTaskUpdate } = useWebSocket();
 
   useEffect(() => {
     if (!open) {
@@ -80,7 +83,8 @@ const TaskDialog = ({
         createdById: user.email,
       };
 
-      await axios.post("http://localhost:8080/task/create-task", taskData);
+      const res = await axios.post("http://localhost:8080/task/create-task", taskData);
+      sendTask(res.data);
       showSnackbar("Task created successfully!", "success");
       fetchTasks();
       onClose();
@@ -97,12 +101,12 @@ const TaskDialog = ({
         createdById: user.email,
       };
 
-      await axios.put(
+      const res = await axios.put(
         `http://localhost:8080/task/update-task/${task.id}`,
         taskData
       );
+      sendTaskUpdate(res.data)
       showSnackbar("Task updated successfully!", "success");
-      fetchTasks();
       onClose();
     } catch (error) {
       console.error("Error updating task:", error);
