@@ -10,7 +10,9 @@ export default function Task() {
   const [user, setUser] = useState(state?.user || null);
   const [author, setAuthor] = useState({});
   const [task, setTask] = useState(state?.task || null);
-  const [taskStatus, setTaskStatus] = useState(state?.task?.taskStatus || "PENDING");
+  const [taskStatus, setTaskStatus] = useState(
+    state?.task?.taskStatus || "PENDING"
+  );
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const commentInputRef = useRef(null);
@@ -158,6 +160,7 @@ export default function Task() {
       );
       setNewComment("");
 
+
       if (commentInputRef.current) {
         commentInputRef.current.innerText = "";
         commentInputRef.current.dataset.placeholder = "Add a comment...";
@@ -203,28 +206,28 @@ export default function Task() {
   };
 
   return (
-    <div className="flex justify-center min-h-full h-[calc(100dvh-64px)] text-gray-200 p-5">
-      <div className="rounded-lg p-6 w-full max-w-3xl">
-        <div className="bg-[#1a1a1a]/50 px-6 py-4 rounded-2xl">
+    <div className="flex flex-col justify-between min-h-full h-[calc(100dvh-64px)] text-gray-200 p-5">
+      <div className="rounded-lg p-6 w-full max-w-3xl mx-auto">
+        <div className="bg-[#333333]/50 px-6 py-4 rounded-2xl">
           <div className="mb-5">
-            <p className="text-sm uppercase text-gray-500 font-semibold">
+            <p className="text-sm uppercase text-[#737373] font-semibold">
               Title
             </p>
             <h1 className="text-4xl font-bold text-white">{task.title}</h1>
           </div>
 
           <div className="mb-5">
-            <p className="text-sm uppercase text-gray-500 font-semibold">
+            <p className="text-sm uppercase text-[#737373] font-semibold">
               Task Description
             </p>
             <h1 className="text-lg">{task.description}</h1>
           </div>
 
           <div className="flex flex-wrap gap-4 mt-4">
-            <div className="rounded-full text-sm flex items-center justify-center">
+            <div className="rounded-full text-sm text-[#737373] flex items-center justify-center">
               <strong>Priority:&nbsp;</strong>
               <p
-                className={`rounded-full text-sm font-medium py-2 px-4 border-none ${
+                className={`rounded-full text-gray-300 text-sm font-medium py-2 px-4 border-none ${
                   priorityColors[task.priority]
                 }`}
               >
@@ -233,10 +236,10 @@ export default function Task() {
             </div>
 
             <div className="flex items-center gap-2">
-              <strong className="text-gray-300">Status:</strong>
+              <strong className="text-[#737373] text-sm">Status:</strong>
               {isAdmin ? (
                 <span
-                  className={` rounded-full text-sm font-medium py-2 px-4 border-none focus:outline-none transition-all ${statusColors[taskStatus]}`}
+                  className={` text-gray-300 rounded-full text-sm font-medium py-2 px-4 border-none focus:outline-none transition-all ${statusColors[taskStatus]}`}
                 >
                   {taskStatus}
                 </span>
@@ -271,7 +274,7 @@ export default function Task() {
                 { label: "Assigned To", value: emoployeeUser.name },
               ].map(({ label, value }) => (
                 <p key={label} className="flex flex-col">
-                  <strong className="text-gray-500">{label}:</strong> {value}
+                  <strong className="text-[#737373]">{label}:</strong> {value}
                 </p>
               ))}
             </div>
@@ -281,7 +284,7 @@ export default function Task() {
           <h2 className="text-lg font-semibold text-gray-300">Comments</h2>
           <div
             ref={commentContainerRef}
-            className="space-y-2 mt-3 min-h-[265px] max-h-[265px] px-5 overflow-y-auto"
+            className="space-y-2 mt-3 max-h-[335px]  px-5 overflow-y-auto"
           >
             {comments.length === 0 ? (
               <p className="text-gray-400">No comments yet.</p>
@@ -322,51 +325,46 @@ export default function Task() {
               ))
             )}
           </div>
-
+        </div>
+      </div>
+      <div className="sticky bottom-5 w-full max-w-3xl mx-auto bg-[#1a1a1a] rounded-lg p-2">
+        <div className="flex gap-2 items-end bg-[#404040] rounded-2xl p-2">
           <div
-            style={{
-              minHeight: `136px`,
+            contentEditable="true"
+            ref={commentInputRef}
+            onInput={(e) => {
+              setNewComment(e.target.innerText);
+              e.target.style.height = "auto";
+              e.target.style.height = `${Math.min(
+                e.target.scrollHeight,
+                5 * 24
+              )}px`;
+              e.target.dataset.placeholder =
+                e.target.innerText.trim() === "" ? "Add a comment..." : "";
             }}
+            data-placeholder="Add a comment..."
+            className="w-full p-2 text-gray-200 resize-none overflow-y-auto outline-none relative before:absolute before:left-2 before:top-2 before:text-gray-400 before:pointer-events-none before:content-[attr(data-placeholder)]"
+            style={{
+              maxHeight: `${5 * 24}px`,
+              borderRadius: "8px",
+              backgroundColor: "transparent",
+              display: "block",
+              whiteSpace: "pre-wrap",
+              overflowWrap: "break-word",
+            }}
+            role="textbox"
+          />
+          <button
+            onClick={addComment}
+            disabled={newComment.trim() === ""}
+            className={`flex justify-center items-center border-2 h-10 w-24 font-semibold rounded-lg transition-all duration-300 ease-in-out transform ${
+              newComment.trim() !== ""
+                ? "bg-blue-600 border-blue-400 text-white hover:bg-blue-700"
+                : "bg-gray-500 border-[#595959] text-[#404040]"
+            }`}
           >
-            <div className="mt-4 flex gap-2 items-end bg-[#595959] rounded-lg p-2">
-              <div
-                contentEditable="true"
-                ref={commentInputRef}
-                onInput={(e) => {
-                  setNewComment(e.target.innerText);
-                  e.target.style.height = "auto";
-                  e.target.style.height = `${Math.min(
-                    e.target.scrollHeight,
-                    5 * 24
-                  )}px`;
-                  e.target.dataset.placeholder =
-                    e.target.innerText.trim() === "" ? "Add a comment..." : "";
-                }}
-                data-placeholder="Add a comment..."
-                className="w-full p-2 text-gray-200 resize-none overflow-y-auto outline-none relative before:absolute before:left-2 before:top-2 before:text-gray-400 before:pointer-events-none before:content-[attr(data-placeholder)]"
-                style={{
-                  maxHeight: `${5 * 24}px`,
-                  borderRadius: "8px",
-                  backgroundColor: "#595959",
-                  display: "block",
-                  whiteSpace: "pre-wrap",
-                  overflowWrap: "break-word",
-                }}
-                role="textbox"
-              />
-              <button
-                onClick={addComment}
-                disabled={newComment.trim() === ""}
-                className={`flex justify-center items-center h-10 w-24 text-white rounded-lg transition-all duration-300 ease-in-out transform ${
-                  newComment.trim() !== ""
-                    ? "bg-blue-600 hover:bg-blue-700"
-                    : "bg-gray-500"
-                }`}
-              >
-                Send
-              </button>
-            </div>
-          </div>
+            Send
+          </button>
         </div>
       </div>
     </div>
