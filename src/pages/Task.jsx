@@ -35,37 +35,66 @@ export default function Task() {
     }
   }, [state?.task?.id]);
 
+  useEffect(() => {
+    if (!stompClient || !user?.email) return;
   
-  useEffect(() => {
-    setComments((prev) => {
-      const uniqueComments = new Map();
-      prev.forEach(comment => uniqueComments.set(comment.id, comment));
-      messages.forEach(msg => uniqueComments.set(msg.id, msg));
-      return Array.from(uniqueComments.values()).sort(
-        (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-      );
-    });
-  }, [messages]);
-  useEffect(() => {
-    if (!messages.length || !user?.email || !state?.task?.id) return;
+    const handleIncomingComment = async (message) => {
+      try {
+        const newComment = JSON.parse(message.body);
+        
+        setComments(prev => {
+          if (prev.some(c => c.id === newComment.id)) {
+            return prev;
+          }
+  
+          const isForCurrentUser = newComment.recipientEmail === user.email;
+          const isForCurrentTask = newComment.taskId === state?.task?.id;
+  
+          const processedComment = isForCurrentUser && isForCurrentTask
+            ? { ...newComment, isReadByRecipient: true }
+            : newComment;
 
-    const newMessages = messages.filter(
-      msg => !comments.some(c => c.id === msg.id)
-    );
-
-    if (newMessages.length > 0) {
-      const forCurrentUser = newMessages.filter(
-        msg => msg.recipientEmail === user.email && msg.taskId === state.task.id
-      );
-
-      if (forCurrentUser.length > 0) {
-        axios.post(
-          `http://localhost:8080/comment/mark-as-read-by-recipient/${state.task.id}`,
-          { recipientEmail: user.email }
-        );
+          return [...prev, processedComment]
+            .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        });
+        if (newComment.recipientEmail === user.email && 
+            newComment.taskId === state?.task?.id) {
+          try {
+            await axios.post(
+              `http://localhost:8080/comment/mark-as-read/${newComment.id}`,
+              { userEmail: user.email }
+            );
+          } catch (error) {
+            console.error("Failed to mark comment as read:", error);
+            setComments(prev => prev.filter(c => c.id !== newComment.id));
+          }
+        }
+      } catch (error) {
+        console.error("Error processing comment:", error);
       }
+    };
+  
+    const subscription = stompClient.subscribe(
+      `/topic/comments`,
+      handleIncomingComment
+    );
+  
+    return () => {
+      if (subscription) subscription.unsubscribe();
+    };
+  }, [stompClient, user?.email, state?.task?.id]);
+  
+
+  useEffect(() => {
+    if (state?.task?.id && user?.email || location.pathname.startsWith("/task")) {
+      axios.post(
+        `http://localhost:8080/comment/mark-as-read-by-recipient/${state.task.id}`,
+        {
+          recipientEmail: user.email,
+        }
+      );
     }
-  }, [messages, user?.email, state?.task?.id, comments]);
+  }, [state?.task?.id, user?.email]);
 
   useEffect(() => {
     if (!state?.task?.id) return;
