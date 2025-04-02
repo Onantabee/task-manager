@@ -192,11 +192,11 @@ const Header = ({ setIsSignup }) => {
   return (
     <>
       <AppBar
-        position="static"
+        position="sticky"
         className="px-5 sm:px-8 md:px-12 lg:px-16 mb-5"
-        sx={{ backgroundColor: "#2A2A2A", boxShadow: "none" }}
+        sx={{ backgroundColor: "#2A2A2A", boxShadow: "none", top: 0 }}
       >
-        <Toolbar sx={{padding: "0 !important"}}>
+        <Toolbar sx={{ padding: "0 !important" }}>
           <div className="w-full justify-center max-w-[1240px] mx-auto items-center hidden md:flex space-x-4 gap-4">
             <h1 className="text-xl font-bold text-gray-500 w-fit">Rhine</h1>
             {!isLoggedIn ? (
@@ -228,7 +228,7 @@ const Header = ({ setIsSignup }) => {
               <div className="flex w-full justify-between items-center gap-4">
                 <div className="w-full flex justify-center items-center">
                   {location.pathname === "/home" && (
-                    <div className="flex items-center justify-center w-[30rem] pl-6 pr-1 bg-[#4d4d4d] py-1 rounded-[15px]">
+                    <div className="flex items-center justify-center w-[30rem] pl-6 pr-1 bg-[#404040] py-1 rounded-[15px]">
                       <input
                         type="text"
                         placeholder="Search tasks..."
@@ -324,7 +324,7 @@ const Header = ({ setIsSignup }) => {
                                 textTransform: "uppercase",
                                 fontWeight: "semibold",
                                 justifyContent: "start",
-                                borderRadius: "15px",
+                                borderRadius: "8px",
                                 padding: "10px",
                                 gap: "10px",
                                 transition: "all 0.2s ease-in-out",
@@ -363,6 +363,7 @@ const Header = ({ setIsSignup }) => {
         sx={{
           "& .MuiDialog-paper": {
             backgroundColor: "#2A2A2A",
+            borderRadius: "15px",
             minWidth: "250px",
             width: "400px",
             color: "#E0E0E0",
@@ -371,33 +372,52 @@ const Header = ({ setIsSignup }) => {
       >
         <DialogTitle
           id="logout-dialog-title"
-          sx={{ color: "#C77BBF", fontWeight: "bold" }}
+          sx={{ color: "#b3b3b3", fontWeight: "bold" }}
         >
-          Confirm Logout
+          Logout?
         </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ padding: "0 24px" }}>
           <DialogContentText
             id="logout-dialog-description"
             sx={{ color: "#E0E0E0" }}
           >
-            You are about to logout.
+            Are you sure you want to logout?
           </DialogContentText>
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ padding: "24px" }}>
           <Button
-            variant="outlined"
+            variant="contained"
             onClick={handleLogoutCancel}
-            color="primary"
+            sx={{ 
+              backgroundColor: "#404040", 
+              color: "#E0E0E0" ,
+              borderRadius: "8px",
+              boxShadow: "none",
+              "&:hover": {
+                backgroundColor: "#4d4d4d",
+                boxShadow: "none",
+              },
+            }}
           >
             Cancel
           </Button>
           <Button
-            variant="outlined"
+            variant="contained"
             onClick={handleLogoutConfirm}
             color="error"
             autoFocus
+            sx={{
+              backgroundColor: "#ff3333",
+              color: "#E0E0E0",
+              borderRadius: "8px",
+              boxShadow: "none",
+              "&:hover": {
+                backgroundColor: "#ff0000",
+                boxShadow: "none",
+              },
+            }}
           >
-            Ok
+            Logout
           </Button>
         </DialogActions>
       </Dialog>

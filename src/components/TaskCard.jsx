@@ -23,6 +23,7 @@ const TaskCard = ({
   onView,
   isAdmin,
   assignee,
+  loggedInUser,
   createdBy,
 }) => {
   const { title, priority, dueDate, taskStatus } = task;
@@ -42,6 +43,31 @@ const TaskCard = ({
 
   const [adminUser, setAdminUser] = useState("");
   const [emoployeeUser, setEmployeeUser] = useState("");
+  const [unreadCountByAuthor, setUnreadCountByAuthor] = useState(0);
+  const [unreadCountByRecipient, setUnreadCountByRecipient] = useState(0);
+
+  // In TaskCard.js
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:8080/comment/count-unread-by-recipient/${task.id}/${loggedInUser.email}`
+        );
+        setUnreadCountByRecipient(res.data);
+      } catch (error) {
+        console.error("Error fetching unread count:", error);
+      }
+    };
+
+    if (loggedInUser?.email && task?.id) {
+      fetchUnreadCount();
+
+      // Set up interval to periodically check for updates
+      const interval = setInterval(fetchUnreadCount, 500); // Every 30 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [task.id, loggedInUser?.email]);
 
   useEffect(() => {
     const fetchCreatorName = async () => {
@@ -67,9 +93,11 @@ const TaskCard = ({
 
   return (
     <div className="relative">
-      <div className="absolute h-4 w-4 rounded-full bg-red-500 text-gray-300 text-lg flex justify-center items-center -right-2 -top-2 p-3">
-        $
-      </div>
+      {unreadCountByRecipient > 0 && (
+        <div className="absolute h-4 w-4 rounded-full bg-red-500 text-gray-300 text-lg flex justify-center items-center -right-2 -top-2 p-3">
+          {unreadCountByRecipient}
+        </div>
+      )}
       <Card
         sx={{
           minWidth: "100%",

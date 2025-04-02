@@ -5,7 +5,7 @@ import useWebSocket from "../hooks/useWebSocket";
 
 export default function Task() {
   const { state } = useLocation();
-  const { messages, sendMessage } = useWebSocket();
+  const { messages, client: stompClient, sendMessage } = useWebSocket();
   const isAdmin = state?.isAdmin || false;
   const [user, setUser] = useState(state?.user || null);
   const [author, setAuthor] = useState({});
@@ -20,6 +20,7 @@ export default function Task() {
   const { tasks: wsTasks } = useWebSocket();
   const [adminUser, setAdminUser] = useState("");
   const [emoployeeUser, setEmployeeUser] = useState("");
+  const location = useLocation();
 
   const fetchComment = useCallback(async () => {
     try {
@@ -33,6 +34,38 @@ export default function Task() {
       console.error("Error fetching comments:", error);
     }
   }, [state?.task?.id]);
+
+  
+  useEffect(() => {
+    setComments((prev) => {
+      const uniqueComments = new Map();
+      prev.forEach(comment => uniqueComments.set(comment.id, comment));
+      messages.forEach(msg => uniqueComments.set(msg.id, msg));
+      return Array.from(uniqueComments.values()).sort(
+        (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+      );
+    });
+  }, [messages]);
+  useEffect(() => {
+    if (!messages.length || !user?.email || !state?.task?.id) return;
+
+    const newMessages = messages.filter(
+      msg => !comments.some(c => c.id === msg.id)
+    );
+
+    if (newMessages.length > 0) {
+      const forCurrentUser = newMessages.filter(
+        msg => msg.recipientEmail === user.email && msg.taskId === state.task.id
+      );
+
+      if (forCurrentUser.length > 0) {
+        axios.post(
+          `http://localhost:8080/comment/mark-as-read-by-recipient/${state.task.id}`,
+          { recipientEmail: user.email }
+        );
+      }
+    }
+  }, [messages, user?.email, state?.task?.id, comments]);
 
   useEffect(() => {
     if (!state?.task?.id) return;
@@ -150,13 +183,33 @@ export default function Task() {
   const addComment = async () => {
     if (!user) return;
     try {
+      const commentPayload = isAdmin
+        ? {
+            authorEmail: user.email,
+            content: newComment,
+            recipientEmail: task.assigneeId || null,
+            isRead: true,
+          }
+        : {
+            authorEmail: user.email,
+            content: newComment,
+            recipientEmail: task.createdById || null,
+            isRead: true,
+          };
+
       const res = await axios.post(
         `http://localhost:8080/comment/task/${state.task.id}`,
-        {
-          authorEmail: user.email,
-          content: newComment,
-          recipientEmail: task.assigneeId || null,
-        }
+        commentPayload
+      );
+      console.log(
+        "user:",
+        user.email,
+        "comment:",
+        newComment,
+        "reciepient:",
+        task.assigneeId,
+        "isread:",
+        true
       );
       setNewComment("");
 

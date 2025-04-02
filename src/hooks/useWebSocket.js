@@ -100,6 +100,7 @@ export default function useWebSocket() {
   return {
     messages,
     tasks,
+    client,
     isConnected,
     error: connectionError,
     reconnect: connect,
