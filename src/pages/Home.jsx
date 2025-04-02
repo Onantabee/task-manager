@@ -259,7 +259,7 @@ export default function Home() {
               <div key={task.id}>
                 {!isAdmin ? (
                   <Link to={`/task/${task.id}`} state={{ task, isAdmin, user }}>
-                    <TaskList
+                    <TaskCard
                       task={task}
                       onEdit={() => handleOpenDialog(task)}
                       onDelete={() => handleDeleteTask(task.id)}
@@ -270,7 +270,7 @@ export default function Home() {
                     />
                   </Link>
                 ) : (
-                  <TaskList
+                  <TaskCard
                     task={task}
                     onEdit={() => handleOpenDialog(task)}
                     onDelete={() => handleDeleteTask(task.id)}
