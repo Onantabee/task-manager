@@ -213,7 +213,6 @@ export default function Task() {
       );
       setNewComment("");
 
-
       if (commentInputRef.current) {
         commentInputRef.current.innerText = "";
         commentInputRef.current.dataset.placeholder = "Add a comment...";
