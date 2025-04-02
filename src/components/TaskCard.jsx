@@ -10,146 +10,238 @@ import {
   Box,
 } from "@mui/material";
 import {
-  Person as AssigneeIcon,
-  CalendarToday as DueDateIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  PriorityHigh as PriorityHighIcon,
-  LowPriority as LowPriorityIcon,
-  HourglassEmpty as HourglassEmptyIcon,
-  Info as StatusIcon,
   Visibility as ViewIcon,
 } from "@mui/icons-material";
 import axios from "axios";
 
-const TaskCard = ({ task, onEdit, onDelete, onView, isAdmin, assignee, createdBy}) => {
+const TaskCard = ({
+  task,
+  onEdit,
+  onDelete,
+  onView,
+  isAdmin,
+  assignee,
+  createdBy,
+}) => {
   const { title, priority, dueDate, taskStatus } = task;
 
-  const priorityIcons = {
-    High: { color: "error", icon: <PriorityHighIcon color="error" /> },
-    Medium: { color: "warning", icon: <HourglassEmptyIcon color="warning" /> },
-    Low: { color: "success", icon: <LowPriorityIcon color="success" /> },
+  const statusColors = {
+    PENDING: { backgroundColor: "rgba(234, 179, 8, 0.6)" },
+    ONGOING: { backgroundColor: "rgba(59, 130, 246, 0.6)" },
+    COMPLETED: { backgroundColor: "rgba(34, 197, 94, 0.6)" },
+    CANCELLED: { backgroundColor: "rgba(107, 114, 128, 0.6)" },
+  };
+
+  const priorityColors = {
+    Low: { backgroundColor: "rgba(0, 230, 0, 0.6)" },
+    Medium: { backgroundColor: "rgba(255, 165, 0, 0.6)" },
+    High: { backgroundColor: "rgba(255, 0, 0, 0.6)" },
   };
 
   const [adminUser, setAdminUser] = useState("");
   const [emoployeeUser, setEmployeeUser] = useState("");
 
-  useEffect( () => {
+  useEffect(() => {
     const fetchCreatorName = async () => {
       try {
-        const res = await axios.get(
-          `http://localhost:8080/users/${createdBy}`
-        );
+        const res = await axios.get(`http://localhost:8080/users/${createdBy}`);
         setAdminUser(res.data);
       } catch (error) {
         console.error("Error fetching author:", error);
       }
-    }
+    };
 
     const fetchAssigneeName = async () => {
       try {
-        const res = await axios.get(
-          `http://localhost:8080/users/${assignee}`
-        );
+        const res = await axios.get(`http://localhost:8080/users/${assignee}`);
         setEmployeeUser(res.data);
       } catch (error) {
         console.error("Error fetching author:", error);
       }
-    }
-    fetchCreatorName()
-    fetchAssigneeName()
-  }, [createdBy, assignee])
+    };
+    fetchCreatorName();
+    fetchAssigneeName();
+  }, [createdBy, assignee]);
 
   return (
     <Card
       sx={{
         minWidth: "100%",
-        borderRadius: 3,
-        boxShadow: 6,
+        padding: "10px",
+        borderRadius: "15px",
         backgroundColor: "#1f1f1f",
         color: "#ddd",
-        transition: "transform 0.2s, box-shadow 0.2s",
-        border: "1px solid #404040",
+        transition: "transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out",
+        border: "2px solid #404040",
         "&:hover": {
-          boxShadow: 10,
+          "& .action-button": {
+            color: "#595959",
+          },
+          "& .title": {
+            color: "#cccccc",
+          }
         },
       }}
     >
-      <CardContent>
-        <Typography 
-          variant="h6" 
-          gutterBottom 
+      <CardContent
+        sx={{
+          padding: "0 !important",
+        }}
+      >
+        <Typography
+          gutterBottom
           fontWeight="bold"
-          sx={{ whiteSpace: "nowrap", color:"#f0bbb5", overflow: "hidden", textOverflow: "ellipsis", background: "#333333", borderRadius: "5px", marginBottom: "12px", padding: "8px 8px" }}
+          sx={{
+            whiteSpace: "nowrap",
+            fontSize: "16px",
+            color: "#a6a6a6",
+            textWrap: "wrap",
+            borderRadius: "10px",
+            marginBottom: "0px",
+            paddingTop: "8px",
+            transition: "color 0.3s ease-in-out",
+          }}
+          className="title"
         >
           {title}
         </Typography>
+        <Divider sx={{ backgroundColor: "#333333", marginY: 2 }} />
+        <Box
+          sx={{
+            display: "flex",
+            gap: 1,
+            alignItems: "center",
+            mb: 1,
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <Chip
+              sx={{
+                ...statusColors[taskStatus],
+                minWidth: "90px",
+                minHeight: "20px",
+              }}
+              label={taskStatus}
+              size="small"
+            />
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <Chip
+              sx={{
+                ...priorityColors[priority],
+                minWidth: "80px",
+                minHeight: "20px",
+              }}
+              label={priority}
+              size="small"
+            />
+          </Box>
+        </Box>
 
-        <Stack direction="row" spacing={1} alignItems="center" mb={1}>
-          <DueDateIcon fontSize="small" color="action" />
-          <Typography variant="body2" color="textSecondary">
-            Due: <strong>{new Date(dueDate).toLocaleDateString()}</strong>
-          </Typography>
+        <Stack direction="row" spacing={1} alignItems="center" mb={2}>
+          {isAdmin ? (
+            <Stack direction="row" spacing={1} alignItems="center" mb={2}>
+              <div className="w-6 h-6 bg-[#C77BBF] text-[#1f1f1f] rounded-full flex justify-center items-center text-lg cursor-pointer">
+                {emoployeeUser.name?.charAt(0) || "U"}
+              </div>
+            </Stack>
+          ) : (
+            <Stack direction="row" spacing={1} alignItems="center" mb={2}>
+              <Typography variant="body2" color="textSecondary" className="flex flex-col">
+                <span className="text-[#4d4d4d]">Creator</span> <span className="text-[#999999]">{adminUser.name}</span>
+              </Typography>
+            </Stack>
+          )}
+          <div className="bg-[#4d4d4d] w-1 h-1 rounded-full"></div>
+          <Stack direction="row" spacing={1} alignItems="center" mb={1}>
+            <Typography variant="body2" color="textSecondary"className="flex flex-col" >
+              {!isAdmin && (
+                <span className="text-[#4d4d4d]">Due</span>
+              )}
+              <span className="text-[#999999]">
+                {new Intl.DateTimeFormat("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                }).format(new Date(dueDate))}
+              </span>
+            </Typography>
+          </Stack>
         </Stack>
-
-        <Stack direction="row" spacing={1} alignItems="center" mb={1}>
-          <StatusIcon fontSize="small" color="action" />
-          <Typography variant="body2" color="textSecondary">
-            Status:
-          </Typography>
-          <Chip label={taskStatus} color="default" size="small" />
-        </Stack>
-
-        <Stack direction="row" spacing={1} alignItems="center" mb={1}>
-          {priorityIcons[priority]?.icon}
-          <Typography variant="body2" color="textSecondary">
-            Priority:
-          </Typography>
-          <Chip
-            label={priority}
-            color={priorityIcons[priority]?.color || "default"}
-            size="small"
-          />
-        </Stack>
-
-        {isAdmin? (
-          <Stack direction="row" spacing={1} alignItems="center" mb={2}>
-          <AssigneeIcon fontSize="small" color="action" />
-          <Typography variant="body2" color="textSecondary">
-            Assignee: <strong>{emoployeeUser.name}</strong>
-          </Typography>
-        </Stack>
-        ):(
-          <Stack direction="row" spacing={1} alignItems="center" mb={2}>
-          <AssigneeIcon fontSize="small" color="action" />
-          <Typography variant="body2" color="textSecondary">
-            Created by: <strong>{adminUser.name}</strong>
-          </Typography>
-        </Stack>
-        )}
 
         {isAdmin && (
           <>
-            <Divider sx={{ backgroundColor: "#505050", marginY: 2 }} />
+            <Divider sx={{ backgroundColor: "#333333", marginY: 2 }} />
             <Box display="flex" padding={0} justifyContent="flex-end">
               <Stack direction="row" spacing={1}>
                 <Button
-                  variant="outlined"
-                  color="primary"
                   onClick={onView}
-                  sx={{ display: "flex", justifyContent: "center", alignItems: "center", minWidth: "40px" }}
+                  className="action-button"
+                  sx={{
+                    borderRadius: "5px",
+                    minWidth: 0,
+                    padding: "2px 5px !important",
+                    color: "transparent",
+                    transition: "color 0.3s ease-in-out",
+                    "&:hover": {
+                      color: (theme) =>
+                        `${theme.palette.primary.main} !important`,
+                      backgroundColor: "transparent !important",
+                      "& .MuiTouchRipple-root": {
+                        display: "none",
+                      },
+                    },
+                  }}
                 >
                   <ViewIcon />
                 </Button>
                 <Button
-                  variant="outlined"
+                  className="action-button"
+                  sx={{
+                    borderRadius: "5px",
+                    minWidth: 0,
+                    padding: "2px 5px !important",
+                    color: "transparent",
+                    transition: "color 0.3s ease-in-out",
+                    "&:hover": {
+                      color: (theme) => `${theme.palette.info.main} !important`,
+                      backgroundColor: "transparent !important",
+                      "& .MuiTouchRipple-root": {
+                        display: "none",
+                      },
+                    },
+                  }}
                   onClick={onEdit}
                 >
                   <EditIcon />
                 </Button>
                 <Button
-                  variant="outlined"
-                  color="error"
+                  sx={{
+                    borderRadius: "5px",
+                    minWidth: 0,
+                    padding: "2px 5px !important",
+                    color: "#ff6666",
+                    transition: "color 0.3s ease-in-out",
+                    "&:hover": {
+                      color: (theme) => theme.palette.error.main,
+                      backgroundColor: "transparent !important",
+                      "& .MuiTouchRipple-root": {
+                        display: "none",
+                      },
+                    },
+                  }}
                   onClick={onDelete}
                 >
                   <DeleteIcon />

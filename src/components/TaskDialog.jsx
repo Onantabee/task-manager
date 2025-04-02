@@ -84,7 +84,6 @@ const TaskDialog = ({
       };
 
       const res = await axios.post("http://localhost:8080/task/create-task", taskData);
-      sendTask(res.data);
       showSnackbar("Task created successfully!", "success");
       fetchTasks();
       onClose();
@@ -105,7 +104,6 @@ const TaskDialog = ({
         `http://localhost:8080/task/update-task/${task.id}`,
         taskData
       );
-      sendTaskUpdate(res.data)
       showSnackbar("Task updated successfully!", "success");
       onClose();
     } catch (error) {

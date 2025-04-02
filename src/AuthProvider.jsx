@@ -1,28 +1,62 @@
-import React, { createContext, useState, useEffect, useContext } from "react"; // Add useContext here
+import { createContext, useState, useEffect, useContext } from "react";
+import axios from "axios";
 
-export const AuthContext = createContext();
+// Define AuthContext separately for cleaner exports
+const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
-  // Retrieve user data from sessionStorage on initial load
+// Custom hook for consuming AuthContext
+const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};
+
+// AuthProvider component
+const AuthProvider = ({ children }) => {
   const storedUser = JSON.parse(sessionStorage.getItem("user")) || {
     email: null,
     name: null,
     isLoggedIn: false,
+    userRole: null,
+    userData: null,
   };
 
   const [isLoggedIn, setIsLoggedIn] = useState(storedUser.isLoggedIn);
   const [userEmail, setUserEmail] = useState(storedUser.email);
   const [userName, setUserName] = useState(storedUser.name);
+  const [userRole, setUserRole] = useState(storedUser.userRole);
+  const [userData, setUserData] = useState(storedUser.userData);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Save user data to sessionStorage whenever it changes
   useEffect(() => {
-    const user = {
-      email: userEmail,
-      name: userName,
-      isLoggedIn: isLoggedIn,
+    const fetchUserData = async () => {
+      if (userEmail) {
+        try {
+          const response = await axios.get(
+            `http://localhost:8080/users/${userEmail}`
+          );
+          setUserData(response.data);
+          setUserName(response.data.name);
+          setUserRole(response.data.userRole);
+
+          const user = {
+            email: userEmail,
+            name: response.data.name,
+            isLoggedIn: true,
+            userRole: response.data.userRole,
+            userData: response.data,
+          };
+          sessionStorage.setItem("user", JSON.stringify(user));
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      }
     };
-    sessionStorage.setItem("user", JSON.stringify(user));
-  }, [userEmail, userName, isLoggedIn]);
+
+    fetchUserData();
+  }, [userEmail]);
 
   const login = (email, name) => {
     setIsLoggedIn(true);
@@ -34,15 +68,30 @@ export const AuthProvider = ({ children }) => {
     setIsLoggedIn(false);
     setUserEmail(null);
     setUserName(null);
-    sessionStorage.removeItem("user"); // Clear user data on logout
+    setUserRole(null);
+    setUserData(null);
+    sessionStorage.removeItem("user");
   };
 
   return (
-    <AuthContext.Provider value={{ userEmail, userName, isLoggedIn, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        userEmail,
+        userName,
+        isLoggedIn,
+        userRole,
+        userData,
+        isAdmin: userRole === "ADMIN",
+        searchTerm,
+        setSearchTerm,
+        login,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Export the useAuth hook with useContext
-export const useAuth = () => useContext(AuthContext);
+// Named exports (consistent with Fast Refresh requirements)
+export { AuthContext, AuthProvider, useAuth };

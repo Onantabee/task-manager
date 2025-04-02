@@ -5,7 +5,7 @@ const Layout = ({ children, setIsSignup }) => {
   return (
     <div>
       <Header setIsSignup={setIsSignup} />
-      <main>{children}</main>
+      <main className="max-w-[1500px] mx-auto">{children}</main>
     </div>
   );
 };

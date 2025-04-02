@@ -14,6 +14,9 @@ import { useAuth } from "../AuthProvider.jsx";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import useWebSocket from "../hooks/useWebSocket.js";
+import { Search, SearchCheck } from "lucide-react";
+import { Masonry } from "react-plock";
+import TaskList from "../components/TaskList.jsx";
 
 export default function Home() {
   const darkTheme = createTheme({
@@ -24,7 +27,7 @@ export default function Home() {
       divider: "#424242",
     },
   });
-  const { userEmail } = useAuth();
+  const { userEmail, searchTerm, setSearchTerm } = useAuth();
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [tasks, setTasks] = useState([]);
@@ -64,23 +67,31 @@ export default function Home() {
   }, [userEmail]);
 
   useEffect(() => {
-  if (wsTasks.length > 0) {
-    setTasks(prevTasks => {
-      const taskMap = new Map(prevTasks.map(task => [String(task.id), task]));
-      
-      wsTasks.forEach(wsTask => {
-        const taskId = String(wsTask.id);
-        if (wsTask.deleted) {
-          taskMap.delete(taskId);
-        } else {
-          taskMap.set(taskId, { ...taskMap.get(taskId), ...wsTask });
-        }
+    if (wsTasks.length > 0) {
+      setTasks((prevTasks) => {
+        const taskMap = new Map(
+          prevTasks.map((task) => [String(task.id), task])
+        );
+
+        wsTasks.forEach((wsTask) => {
+          const taskId = String(wsTask.id);
+          if (wsTask.deleted) {
+            taskMap.delete(taskId);
+          } else {
+            taskMap.set(taskId, { ...taskMap.get(taskId), ...wsTask });
+          }
+        });
+
+        return Array.from(taskMap.values());
       });
-      
-      return Array.from(taskMap.values());
-    });
-  }
-}, [wsTasks]);
+    }
+  }, [wsTasks]);
+
+  useEffect(() => {
+    return () => {
+      setSearchTerm(""); // Clear search when leaving the page
+    };
+  }, []);
 
   const fetchTasks = async () => {
     try {
@@ -104,6 +115,14 @@ export default function Home() {
     setSelectedTask(null);
   };
 
+  const filterTasks = (tasks) => {
+    if (!searchTerm) return tasks;
+
+    return tasks.filter((task) =>
+      task.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  };
+
   const handleDeleteTask = async (id) => {
     try {
       await axios.delete(`http://localhost:8080/task/${id}`);
@@ -123,68 +142,50 @@ export default function Home() {
 
   return (
     <ThemeProvider theme={darkTheme}>
-      {isAdmin && (
-        <div className="w-full py-8 flex justify-center items-center">
-          <div className="w-[35rem] px-5 bg-[#4d4d4d] rounded-2xl">
-            <input
-              type="text"
-              className="text-lg w-full text-gray-300 py-2 focus:outline-0"
-              name=""
-              id=""
-            />
-          </div>
+      <div className={`flex flex-col gap-10 `}>
+        <div className="">
+          {isAdmin && (
+            <Button
+              size="small"
+              endIcon={<AddIcon />}
+              onClick={() => handleOpenDialog()}
+              sx={{
+                position: "relative",
+                backgroundColor: "#ff4d4d",
+                color: "white",
+                overflow: "visible",
+                border: "2px solid transparent",
+                borderRadius: "15px",
+                padding: "6px 15px",
+                "&:hover": {
+                  backgroundColor: "#ff0000",
+                },
+                "&::after": {
+                  content: '""',
+                  position: "absolute",
+                  top: "-10px",
+                  left: "-10px",
+                  right: "-10px",
+                  bottom: "-10px",
+                  border: "3px solid #ff3333",
+                  borderRadius: "20px",
+                  opacity: 1,
+                  transform: "scale(1)",
+                  transition: "opacity 0.3s ease, transform 0.3s ease",
+                  zIndex: 1,
+                },
+                "&:not(:hover)::after": {
+                  opacity: 0,
+                  transform: "scale(0.5)",
+                },
+              }}
+            >
+              Add Task
+            </Button>
+          )}
         </div>
-      )}
-      <div className="pb-8">
-        {isAdmin && (
-          <Button
-            size="small"
-            endIcon={<AddIcon />}
-            onClick={() => handleOpenDialog()}
-            sx={{
-              position: "relative",
-              backgroundColor: "#b30000",
-              color: "white",
-              overflow: "visible",
-              border: "2px solid transparent",
-              "&:hover": {
-                backgroundColor: "red",
-              },
-              "&::after": {
-                content: '""',
-                position: "absolute",
-                top: "-10px",
-                left: "-10px",
-                right: "-10px",
-                bottom: "-10px",
-                border: "3px solid #ff3333",
-                borderRadius: "6px",
-                opacity: 1,
-                transform: "scale(1)",
-                transition: "opacity 0.3s ease, transform 0.3s ease",
-                zIndex: 1,
-              },
-              "&:not(:hover)::after": {
-                opacity: 0,
-                transform: "scale(0.5)",
-              },
-            }}
-          >
-            Add Task
-          </Button>
-        )}
-      </div>
-      {/* {!isConnected && (
-        <Alert severity="warning" sx={{ mb: 2 }}>
-          Real-time updates disconnected. Changes may not appear immediately.
-        </Alert>
-      )} */}
 
-      <div className="text-2xl text-gray-400">
-        Welcome, {user ? user.name : "Guest"}
-      </div>
-
-      <div className="py-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 w-full mx-auto gap-4">
+        {/* <div className="flex flex-col gap-3">
         {tasks.length > 0 ? (
           (() => {
             const userTasks = tasks.filter(
@@ -195,13 +196,13 @@ export default function Home() {
 
             return userTasks.length > 0 ? (
               userTasks.map((task) => (
-                <div key={task.id} className="flex flex-col justify-between">
+                <div key={task.id}>
                   {!isAdmin ? (
                     <Link
                       to={`/task/${task.id}`}
                       state={{ task, isAdmin, user }}
                     >
-                      <TaskCard
+                      <TaskList
                         task={task}
                         onEdit={() => handleOpenDialog(task)}
                         onDelete={() => handleDeleteTask(task.id)}
@@ -212,7 +213,7 @@ export default function Home() {
                       />
                     </Link>
                   ) : (
-                    <TaskCard
+                    <TaskList
                       task={task}
                       onEdit={() => handleOpenDialog(task)}
                       onDelete={() => handleDeleteTask(task.id)}
@@ -236,6 +237,70 @@ export default function Home() {
         ) : (
           <Typography color="gray">No tasks available</Typography>
         )}
+      </div> */}
+
+        <div>
+          <Masonry
+            items={(() => {
+              const filtered = filterTasks(tasks);
+              const userTasks = filtered.filter(
+                (task) =>
+                  user?.email === task.createdById ||
+                  user?.email === task.assigneeId
+              );
+              return userTasks.length > 0 ? userTasks : [];
+            })()}
+            config={{
+              columns: [1, 2, 3, 4],
+              gap: [16, 16, 16, 16],
+              media: [640, 768, 1024, 1280],
+            }}
+            render={(task) => (
+              <div key={task.id}>
+                {!isAdmin ? (
+                  <Link to={`/task/${task.id}`} state={{ task, isAdmin, user }}>
+                    <TaskList
+                      task={task}
+                      onEdit={() => handleOpenDialog(task)}
+                      onDelete={() => handleDeleteTask(task.id)}
+                      loggedInUser={user}
+                      isAdmin={isAdmin}
+                      assignee={task.assigneeId}
+                      createdBy={task.createdById}
+                    />
+                  </Link>
+                ) : (
+                  <TaskList
+                    task={task}
+                    onEdit={() => handleOpenDialog(task)}
+                    onDelete={() => handleDeleteTask(task.id)}
+                    onView={() =>
+                      navigate(`/task/${task.id}`, {
+                        state: { task, isAdmin, user },
+                      })
+                    }
+                    loggedInUser={user}
+                    isAdmin={isAdmin}
+                    assignee={task.assigneeId}
+                    createdBy={task.createdById}
+                  />
+                )}
+              </div>
+            )}
+          />
+
+          {(() => {
+            const filtered = filterTasks(tasks);
+            const userTasks = filtered.filter(
+              (task) =>
+                user?.email === task.createdById ||
+                user?.email === task.assigneeId
+            );
+            return userTasks.length === 0 ? (
+              <Typography color="gray">No tasks available</Typography>
+            ) : null;
+          })()}
+        </div>
       </div>
 
       <TaskDialog

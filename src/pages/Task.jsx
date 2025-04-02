@@ -10,20 +10,23 @@ export default function Task() {
   const [user, setUser] = useState(state?.user || null);
   const [author, setAuthor] = useState({});
   const [task, setTask] = useState(state?.task || null);
-  const [taskStatus, setTaskStatus] = useState(
-    state?.task?.taskStatus || "PENDING"
-  );
+  const [taskStatus, setTaskStatus] = useState(state?.task?.taskStatus || "PENDING");
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
-  const commentInputRef = useRef(null); 
+  const commentInputRef = useRef(null);
   const commentContainerRef = useRef(null);
+  const { tasks: wsTasks } = useWebSocket();
+  const [adminUser, setAdminUser] = useState("");
+  const [emoployeeUser, setEmployeeUser] = useState("");
 
   const fetchComment = useCallback(async () => {
     try {
       const res = await axios.get(
         `http://localhost:8080/comment/task/${state.task.id}`
       );
-      setComments(res.data.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)));
+      setComments(
+        res.data.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+      );
     } catch (error) {
       console.error("Error fetching comments:", error);
     }
@@ -76,6 +79,48 @@ export default function Task() {
   }, [state?.task?.id, user, comments]);
 
   useEffect(() => {
+    const fetchCreatorName = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:8080/users/${task.createdById}`
+        );
+        setAdminUser(res.data);
+      } catch (error) {
+        console.error("Error fetching author:", error);
+      }
+    };
+
+    const fetchAssigneeName = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:8080/users/${task.assigneeId}`
+        );
+        setEmployeeUser(res.data);
+      } catch (error) {
+        console.error("Error fetching author:", error);
+      }
+    };
+    fetchCreatorName();
+    fetchAssigneeName();
+  }, [task.createdById, task.assigneeId]);
+
+  useEffect(() => {
+    if (wsTasks.length > 0) {
+      const relevantUpdates = wsTasks.filter(
+        (wsTask) => String(wsTask.id) === String(task?.id)
+      );
+
+      if (relevantUpdates.length > 0) {
+        const latestUpdate = relevantUpdates[relevantUpdates.length - 1];
+        if (!latestUpdate.deleted) {
+          setTask((prev) => ({ ...prev, ...latestUpdate }));
+          setTaskStatus(latestUpdate.taskStatus);
+        }
+      }
+    }
+  }, [wsTasks, task?.id]);
+
+  useEffect(() => {
     if (state?.task?.id) {
       fetchComment();
     }
@@ -83,17 +128,19 @@ export default function Task() {
 
   useEffect(() => {
     setComments((prev) => {
-        const uniqueComments = new Map(prev.map((comment) => [comment.id, comment]));
-        messages.forEach((msg) => uniqueComments.set(msg.id, msg));
-        return Array.from(uniqueComments.values());
+      const uniqueComments = new Map(
+        prev.map((comment) => [comment.id, comment])
+      );
+      messages.forEach((msg) => uniqueComments.set(msg.id, msg));
+      return Array.from(uniqueComments.values());
     });
-}, [messages]);
-
+  }, [messages]);
 
   useEffect(() => {
     if (commentContainerRef.current) {
       setTimeout(() => {
-        commentContainerRef.current.scrollTop = commentContainerRef.current.scrollHeight;
+        commentContainerRef.current.scrollTop =
+          commentContainerRef.current.scrollHeight;
       }, 100);
     }
   }, [comments]);
@@ -101,26 +148,24 @@ export default function Task() {
   const addComment = async () => {
     if (!user) return;
     try {
-        const res = await axios.post(
-            `http://localhost:8080/comment/task/${state.task.id}`,
-            {
-                authorEmail: user.email,
-                content: newComment,
-                recipientEmail: task.assigneeId || null,
-            }
-        );
-
-        sendMessage(res.data);
-        setNewComment("");
-
-        if (commentInputRef.current) {
-            commentInputRef.current.innerText = "";
-            commentInputRef.current.dataset.placeholder = "Add a comment...";
+      const res = await axios.post(
+        `http://localhost:8080/comment/task/${state.task.id}`,
+        {
+          authorEmail: user.email,
+          content: newComment,
+          recipientEmail: task.assigneeId || null,
         }
+      );
+      setNewComment("");
+
+      if (commentInputRef.current) {
+        commentInputRef.current.innerText = "";
+        commentInputRef.current.dataset.placeholder = "Add a comment...";
+      }
     } catch (error) {
-        console.error("Error adding comment", error);
+      console.error("Error adding comment", error);
     }
-};
+  };
 
   const statusColors = {
     PENDING: "bg-yellow-500/50",
@@ -158,7 +203,7 @@ export default function Task() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-full h-[calc(100dvh-64px)] text-gray-200 p-5">
+    <div className="flex justify-center min-h-full h-[calc(100dvh-64px)] text-gray-200 p-5">
       <div className="rounded-lg p-6 w-full max-w-3xl">
         <div className="bg-[#1a1a1a]/50 px-6 py-4 rounded-2xl">
           <div className="mb-5">
@@ -222,8 +267,8 @@ export default function Task() {
                     year: "numeric",
                   }).format(new Date(task.dueDate)),
                 },
-                { label: "Created By", value: task.createdById },
-                { label: "Assigned To", value: task.assigneeId },
+                { label: "Created By", value: adminUser.name },
+                { label: "Assigned To", value: emoployeeUser.name },
               ].map(({ label, value }) => (
                 <p key={label} className="flex flex-col">
                   <strong className="text-gray-500">{label}:</strong> {value}
@@ -294,7 +339,8 @@ export default function Task() {
                     e.target.scrollHeight,
                     5 * 24
                   )}px`;
-                  e.target.dataset.placeholder = e.target.innerText.trim() === "" ? "Add a comment..." : "";
+                  e.target.dataset.placeholder =
+                    e.target.innerText.trim() === "" ? "Add a comment..." : "";
                 }}
                 data-placeholder="Add a comment..."
                 className="w-full p-2 text-gray-200 resize-none overflow-y-auto outline-none relative before:absolute before:left-2 before:top-2 before:text-gray-400 before:pointer-events-none before:content-[attr(data-placeholder)]"
@@ -310,9 +356,11 @@ export default function Task() {
               />
               <button
                 onClick={addComment}
-                hidden={newComment.trim() === ""}
-                className={`bg-blue-600 flex justify-center items-center h-10 w-24 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 ease-in-out transform ${
-                  newComment.trim() !== "" ? "opacity-100 scale-100" : "opacity-0 scale-90"
+                disabled={newComment.trim() === ""}
+                className={`flex justify-center items-center h-10 w-24 text-white rounded-lg transition-all duration-300 ease-in-out transform ${
+                  newComment.trim() !== ""
+                    ? "bg-blue-600 hover:bg-blue-700"
+                    : "bg-gray-500"
                 }`}
               >
                 Send
