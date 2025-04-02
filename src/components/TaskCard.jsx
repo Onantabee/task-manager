@@ -61,9 +61,7 @@ const TaskCard = ({
 
     if (loggedInUser?.email && task?.id) {
       fetchUnreadCount();
-
-      // Set up interval to periodically check for updates
-      const interval = setInterval(fetchUnreadCount, 500); // Every 30 seconds
+      const interval = setInterval(fetchUnreadCount, 500);
 
       return () => clearInterval(interval);
     }
