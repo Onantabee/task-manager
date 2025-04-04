@@ -119,10 +119,11 @@ const TaskDialog = ({
       fullWidth
       sx={{
         "& .MuiBackdrop-root": {
-          backgroundColor: "hsla(0, 0%, 0%, 0.5)",
+          backgroundColor: "hsla(0, 0%, 0%, 0.5)"
         },
         "& .MuiPaper-root": {
           backgroundColor: "#0d0d0d",
+          borderRadius: "15px"
         },
       }}
     >
@@ -304,8 +305,7 @@ const TaskDialog = ({
             </Select>
           </FormControl>
         </div>
-      </DialogContent>
-      <DialogActions>
+        <DialogActions sx={{padding: "20px 0 0"}}>
         <Button onClick={onClose}>Cancel</Button>
         <Button
           variant="contained"
@@ -315,6 +315,7 @@ const TaskDialog = ({
           {task ? "Update" : "Save"}
         </Button>
       </DialogActions>
+      </DialogContent>
     </Dialog>
   );
 };

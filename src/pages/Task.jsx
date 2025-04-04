@@ -37,28 +37,32 @@ export default function Task() {
 
   useEffect(() => {
     if (!stompClient || !user?.email) return;
-  
+
     const handleIncomingComment = async (message) => {
       try {
         const newComment = JSON.parse(message.body);
-        
-        setComments(prev => {
-          if (prev.some(c => c.id === newComment.id)) {
+
+        setComments((prev) => {
+          if (prev.some((c) => c.id === newComment.id)) {
             return prev;
           }
-  
+
           const isForCurrentUser = newComment.recipientEmail === user.email;
           const isForCurrentTask = newComment.taskId === state?.task?.id;
-  
-          const processedComment = isForCurrentUser && isForCurrentTask
-            ? { ...newComment, isReadByRecipient: true }
-            : newComment;
 
-          return [...prev, processedComment]
-            .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+          const processedComment =
+            isForCurrentUser && isForCurrentTask
+              ? { ...newComment, isReadByRecipient: true }
+              : newComment;
+
+          return [...prev, processedComment].sort(
+            (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+          );
         });
-        if (newComment.recipientEmail === user.email && 
-            newComment.taskId === state?.task?.id) {
+        if (
+          newComment.recipientEmail === user.email &&
+          newComment.taskId === state?.task?.id
+        ) {
           try {
             await axios.post(
               `http://localhost:8080/comment/mark-as-read/${newComment.id}`,
@@ -66,27 +70,29 @@ export default function Task() {
             );
           } catch (error) {
             console.error("Failed to mark comment as read:", error);
-            setComments(prev => prev.filter(c => c.id !== newComment.id));
+            setComments((prev) => prev.filter((c) => c.id !== newComment.id));
           }
         }
       } catch (error) {
         console.error("Error processing comment:", error);
       }
     };
-  
+
     const subscription = stompClient.subscribe(
       `/topic/comments`,
       handleIncomingComment
     );
-  
+
     return () => {
       if (subscription) subscription.unsubscribe();
     };
   }, [stompClient, user?.email, state?.task?.id]);
-  
 
   useEffect(() => {
-    if (state?.task?.id && user?.email || location.pathname.startsWith("/task")) {
+    if (
+      (state?.task?.id && user?.email) ||
+      location.pathname.startsWith("/task")
+    ) {
       axios.post(
         `http://localhost:8080/comment/mark-as-read-by-recipient/${state.task.id}`,
         {
@@ -392,7 +398,7 @@ export default function Task() {
                     </span>
                     <p className="text-md text-gray-300">{comment.content}</p>
                   </div>
-                  <p className="text-xs text-right">
+                  <p className="text-xs text-gray-500 text-right">
                     {new Intl.DateTimeFormat("en-US", {
                       hour: "2-digit",
                       minute: "2-digit",

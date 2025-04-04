@@ -15,6 +15,7 @@ import {
   Visibility as ViewIcon,
 } from "@mui/icons-material";
 import axios from "axios";
+import useWebSocket from "../hooks/useWebSocket";
 
 const TaskCard = ({
   task,
@@ -42,12 +43,13 @@ const TaskCard = ({
   };
 
   const [adminUser, setAdminUser] = useState("");
-  const [emoployeeUser, setEmployeeUser] = useState("");
-  const [unreadCountByAuthor, setUnreadCountByAuthor] = useState(0);
+  const [employeeUser, setEmployeeUser] = useState("");
   const [unreadCountByRecipient, setUnreadCountByRecipient] = useState(0);
+  const { client, isConnected } = useWebSocket();
 
-  // In TaskCard.js
   useEffect(() => {
+    if (!isConnected || !client) return;
+
     const fetchUnreadCount = async () => {
       try {
         const res = await axios.get(
@@ -59,13 +61,23 @@ const TaskCard = ({
       }
     };
 
-    if (loggedInUser?.email && task?.id) {
-      fetchUnreadCount();
-      const interval = setInterval(fetchUnreadCount, 500);
+    fetchUnreadCount();
 
-      return () => clearInterval(interval);
-    }
-  }, [task.id, loggedInUser?.email]);
+    const subscription = client.subscribe(
+      `/topic/unread-count/${loggedInUser.email}/${task.id}`,
+      (message) => {
+        try {
+          const update = JSON.parse(message.body);
+          setUnreadCountByRecipient(update.count);
+        } catch (error) {
+          console.error("Error parsing unread count update:", error);
+        }
+      }
+    );
+
+    console.log(unreadCountByRecipient);
+    return () => subscription.unsubscribe();
+  }, [task.id, loggedInUser?.email, client, isConnected]);
 
   useEffect(() => {
     const fetchCreatorName = async () => {
@@ -89,13 +101,33 @@ const TaskCard = ({
     fetchAssigneeName();
   }, [createdBy, assignee]);
 
+  const fullName = String(employeeUser?.name);
+  const names = fullName.split(/\s+/);
+  const firstName = names[0];
+  const lastName = names[1];
+
   return (
     <div className="relative">
-      {unreadCountByRecipient > 0 && (
-        <div className="absolute h-4 w-4 rounded-full bg-red-500 text-gray-300 text-lg flex justify-center items-center -right-2 -top-2 p-3">
-          {unreadCountByRecipient}
-        </div>
-      )}
+      <div>
+        {unreadCountByRecipient > 0 && (
+          <button
+            onClick={onView}
+            className="absolute h-4 w-4 rounded-full cursor-pointer bg-red-500 text-shadow text-gray-300 text-[14px] border-[1px] border-[#fb5059] flex justify-center items-center -right-2 -top-2 p-3"
+          >
+            {unreadCountByRecipient}
+          </button>
+        )}
+        {!isAdmin && (
+          <button
+            onClick={onView}
+            className={`absolute h-4 w-14 rounded-full cursor-pointer bg-[#ff6600] text-gray-300 text-[14px] border-[1px] border-[#ff751a] flex justify-center items-center ${
+              unreadCountByRecipient > 0 ? "right-7" : "-right-2"
+            } -top-2 p-3`}
+          >
+            New
+          </button>
+        )}
+      </div>
       <Card
         sx={{
           minWidth: "100%",
@@ -183,8 +215,8 @@ const TaskCard = ({
           <Stack direction="row" spacing={1} alignItems="center" mb={2}>
             {isAdmin ? (
               <Stack direction="row" spacing={1} alignItems="center" mb={2}>
-                <div className="w-6 h-6 bg-[#C77BBF] text-[#1f1f1f] rounded-full flex justify-center items-center text-lg cursor-pointer">
-                  {emoployeeUser.name?.charAt(0) || "U"}
+                <div className="w-6 h-6 bg-[#C77BBF] text-[#d9d9d9] rounded-full flex justify-center items-center text-sm cursor-pointer">
+                  <span>{lastName?.charAt(0) || "Y"}</span><span>{firstName?.charAt(0) || "U"}</span>
                 </div>
               </Stack>
             ) : (

@@ -23,7 +23,7 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
-import { AuthContext, useAuth } from "../AuthProvider";
+import { useAuth } from "../AuthProvider";
 import { useLocation, useNavigate } from "react-router-dom";
 import { LogOut, Search, X } from "lucide-react";
 
@@ -91,6 +91,11 @@ const Header = ({ setIsSignup }) => {
     };
   }, []);
 
+  const fullName = String(userName);
+  const names = fullName.split(/\s+/)
+  const firstName = names[0];
+  const lastName = names[1];
+
   const drawer = (
     <Drawer
       anchor="right"
@@ -128,10 +133,10 @@ const Header = ({ setIsSignup }) => {
           <div className="flex flex-col justify-center items-center">
             <div className="bg-[#333333] w-full flex p-2 flex-col justify-center items-center rounded-lg">
               <div
-                className="profile w-15 h-15 mb-3 bg-[#C77BBF] rounded-full flex justify-center items-center text-4xl cursor-pointer"
+                className="profile w-15 h-15 mb-3 bg-[#C77BBF] rounded-full flex justify-center items-center text-3xl cursor-pointer"
                 onClick={toggleProfileDropdown}
               >
-                <span>{userName?.charAt(0) || "U"}</span>
+                <span>{firstName?.charAt(0) || "U"}{lastName?.charAt(0) || " "}</span>
               </div>
               <Typography
                 sx={{
@@ -228,10 +233,10 @@ const Header = ({ setIsSignup }) => {
               <div className="flex w-full justify-between items-center gap-4">
                 <div className="w-full flex justify-center items-center">
                   {location.pathname === "/home" && (
-                    <div className="flex items-center justify-center w-[30rem] pl-6 pr-1 bg-[#404040] py-1 rounded-[15px]">
+                    <div className="flex items-center justify-center w-[30rem] transition-colors duration-300 ease-in-out border-2 border-[#404040] focus-within:border-[#8c8c8c] pl-6 pr-1 bg-[#404040] py-1 rounded-[15px]">
                       <input
                         type="text"
-                        placeholder="Search tasks..."
+                        placeholder="Search tasks…"
                         className="text-[16px] w-full text-gray-300 py-1 focus:outline-0"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -259,10 +264,10 @@ const Header = ({ setIsSignup }) => {
                 </div>
                 <div className="relative" ref={profileRef}>
                   <div
-                    className="profile w-10 h-10 bg-[#C77BBF] rounded-full flex justify-center items-center text-3xl cursor-pointer"
+                    className="profile w-10 h-10 bg-[#C77BBF] p-[23px] rounded-full flex justify-center items-center text-lg cursor-pointer"
                     onClick={toggleProfileDropdown}
                   >
-                    <span>{userName?.charAt(0) || "U"}</span>
+                    <span>{firstName?.charAt(0) || "U"}{lastName?.charAt(0) || " "}</span>
                   </div>
                   <Popper
                     open={profileDropdownOpen}

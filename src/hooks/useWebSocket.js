@@ -97,6 +97,17 @@ export default function useWebSocket() {
     };
   }, [connect]);
 
+  // useEffect(() => {
+  //   connect();
+  
+  //   return () => {
+  //     if (client) {
+  //       client.deactivate();
+  //       console.log("WebSocket client deactivated");
+  //     }
+  //   };
+  // }, [connect, client]);
+
   return {
     messages,
     tasks,
