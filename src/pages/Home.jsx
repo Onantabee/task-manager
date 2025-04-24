@@ -14,7 +14,7 @@ import { useAuth } from "../AuthProvider.jsx";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import useWebSocket from "../hooks/useWebSocket.js";
-import { Search, SearchCheck } from "lucide-react";
+import { Grid, List, Search, SearchCheck } from "lucide-react";
 import { Masonry } from "react-plock";
 import TaskList from "../components/TaskList.jsx";
 
@@ -38,6 +38,7 @@ export default function Home() {
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
+  const [isCardView, setIsCardView] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -142,67 +143,127 @@ export default function Home() {
 
   return (
     <ThemeProvider theme={darkTheme}>
-      <div className={`flex flex-col gap-10 `}>
-        <div className="">
-          {isAdmin && (
+      <div className={`flex flex-col gap-3`}>
+        <div className="flex flex-col">
+          <div
+            className={`${
+              isAdmin ? "flex justify-between" : "inline"
+            } border-b-2   border-[#262626] py-3 gap-2`}
+          >
+            <h1 className="text-3xl text-[#8c8c8c]">Tasks</h1>
+            {isAdmin && (
+              <Button
+                size="small"
+                endIcon={<AddIcon />}
+                onClick={() => handleOpenDialog()}
+                sx={{
+                  position: "relative",
+                  backgroundColor: "#ff4d4d",
+                  color: "white",
+                  overflow: "visible",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  border: "2px solid transparent",
+                  borderRadius: "15px",
+                  padding: "6px 15px",
+                  "&:hover": {
+                    backgroundColor: "#ff0000",
+                  },
+                  "&::after": {
+                    content: '""',
+                    position: "absolute",
+                    top: "-10px",
+                    left: "-10px",
+                    right: "-10px",
+                    bottom: "-10px",
+                    border: "3px solid #ff3333",
+                    borderRadius: "20px",
+                    opacity: 1,
+                    transform: "scale(1)",
+                    transition: "opacity 0.3s ease, transform 0.3s ease",
+                    zIndex: 1,
+                  },
+                  "&:not(:hover)::after": {
+                    opacity: 0,
+                    transform: "scale(0.5)",
+                  },
+                }}
+              >
+                Add Task
+              </Button>
+            )}
+          </div>
+          <div className="flex flex-row gap-2 border-b-2   border-[#262626] py-3">
             <Button
-              size="small"
-              endIcon={<AddIcon />}
-              onClick={() => handleOpenDialog()}
+              onClick={() => setIsCardView(true)}
+              variant="contained"
               sx={{
-                position: "relative",
-                backgroundColor: "#ff4d4d",
-                color: "white",
-                overflow: "visible",
-                border: "2px solid transparent",
+                backgroundColor: "hsla(260, 100%, 70%, 0.1)",
+                color: "#9966ff",
+                border: "1px solid #9966ff",
                 borderRadius: "15px",
-                padding: "6px 15px",
+                boxShadow: "none",
                 "&:hover": {
-                  backgroundColor: "#ff0000",
-                },
-                "&::after": {
-                  content: '""',
-                  position: "absolute",
-                  top: "-10px",
-                  left: "-10px",
-                  right: "-10px",
-                  bottom: "-10px",
-                  border: "3px solid #ff3333",
-                  borderRadius: "20px",
-                  opacity: 1,
-                  transform: "scale(1)",
-                  transition: "opacity 0.3s ease, transform 0.3s ease",
-                  zIndex: 1,
-                },
-                "&:not(:hover)::after": {
-                  opacity: 0,
-                  transform: "scale(0.5)",
+                  backgroundColor: "hsla(260, 100%, 70%, 1)",
+                  color: "#1a1a1a",
+                  boxShadow: "none",
                 },
               }}
+              className="flex items-center gap-2"
             >
-              Add Task
+              <Grid size={16} />
+              Card View
             </Button>
-          )}
+            <Button
+              onClick={() => setIsCardView(false)}
+              variant="contained"
+              color="error"
+              sx={{
+                backgroundColor: "hsla(0, 0%, 45%, 0.1)",
+                border: "1px solid #737373",
+                color: "#737373",
+                borderRadius: "15px",
+                boxShadow: "none",
+                "&:hover": {
+                  backgroundColor: "#737373",
+                  color: "#1a1a1a",
+                  boxShadow: "none",
+                },
+              }}
+              className="flex items-center gap-2"
+            >
+              <List size={16} />
+              List View
+            </Button>
+          </div>
         </div>
 
-        {/* <div className="flex flex-col gap-3">
-        {tasks.length > 0 ? (
-          (() => {
-            const userTasks = tasks.filter(
-              (task) =>
-                user?.email === task.createdById ||
-                user?.email === task.assigneeId
-            );
-
-            return userTasks.length > 0 ? (
-              userTasks.map((task) => (
+        {isCardView ? (
+          <div>
+            <Masonry
+              items={(() => {
+                const filtered = filterTasks(tasks);
+                const userTasks = filtered.filter(
+                  (task) =>
+                    user?.email === task.createdById ||
+                    user?.email === task.assigneeId
+                );
+                return userTasks.length > 0 ? userTasks : [];
+              })()}
+              config={{
+                columns: [1, 2, 3, 4],
+                gap: [16, 16, 16, 16],
+                media: [640, 768, 1024, 1280],
+              }}
+              render={(task) => (
                 <div key={task.id}>
                   {!isAdmin ? (
                     <Link
                       to={`/task/${task.id}`}
                       state={{ task, isAdmin, user }}
                     >
-                      <TaskList
+                      <TaskCard
                         task={task}
                         onEdit={() => handleOpenDialog(task)}
                         onDelete={() => handleDeleteTask(task.id)}
@@ -210,10 +271,11 @@ export default function Home() {
                         isAdmin={isAdmin}
                         assignee={task.assigneeId}
                         createdBy={task.createdById}
+                        searchTerm={searchTerm}
                       />
                     </Link>
                   ) : (
-                    <TaskList
+                    <TaskCard
                       task={task}
                       onEdit={() => handleOpenDialog(task)}
                       onDelete={() => handleDeleteTask(task.id)}
@@ -226,81 +288,94 @@ export default function Home() {
                       isAdmin={isAdmin}
                       assignee={task.assigneeId}
                       createdBy={task.createdById}
+                      searchTerm={searchTerm}
                     />
                   )}
                 </div>
-              ))
-            ) : (
-              <Typography color="gray">No tasks available</Typography>
-            );
-          })()
-        ) : (
-          <Typography color="gray">No tasks available</Typography>
-        )}
-      </div> */}
+              )}
+            />
 
-        <div>
-          <Masonry
-            items={(() => {
+            {(() => {
               const filtered = filterTasks(tasks);
               const userTasks = filtered.filter(
                 (task) =>
                   user?.email === task.createdById ||
                   user?.email === task.assigneeId
               );
-              return userTasks.length > 0 ? userTasks : [];
+              return userTasks.length === 0 ? (
+                <Typography color="gray">No tasks available</Typography>
+              ) : null;
             })()}
-            config={{
-              columns: [1, 2, 3, 4],
-              gap: [16, 16, 16, 16],
-              media: [640, 768, 1024, 1280],
-            }}
-            render={(task) => (
-              <div key={task.id}>
-                {!isAdmin ? (
-                  <Link to={`/task/${task.id}`} state={{ task, isAdmin, user }}>
-                    <TaskCard
-                      task={task}
-                      onEdit={() => handleOpenDialog(task)}
-                      onDelete={() => handleDeleteTask(task.id)}
-                      loggedInUser={user}
-                      isAdmin={isAdmin}
-                      assignee={task.assigneeId}
-                      createdBy={task.createdById}
-                    />
-                  </Link>
-                ) : (
-                  <TaskCard
-                    task={task}
-                    onEdit={() => handleOpenDialog(task)}
-                    onDelete={() => handleDeleteTask(task.id)}
-                    onView={() =>
-                      navigate(`/task/${task.id}`, {
-                        state: { task, isAdmin, user },
-                      })
-                    }
-                    loggedInUser={user}
-                    isAdmin={isAdmin}
-                    assignee={task.assigneeId}
-                    createdBy={task.createdById}
-                  />
-                )}
-              </div>
-            )}
-          />
+          </div>
+        ) : (
+          // <div className="flex flex-col w-full">
+          //   <div className="grid grid-rows-1 grid-cols-[40% 20% 20% 10% 10%] text-white">
+          //     <p>Description</p>
+          //     <p>Status Priority</p>
+          //     <p>Assignee</p>
+          //     <p>Due Date</p>
+          //     <p>{" "}</p>
+          //   </div>
+          //   <div className="flex flex-col gap-2">
+          //     {tasks.length > 0 ? (
+          //       (() => {
+          //         const userTasks = tasks.filter(
+          //           (task) =>
+          //             user?.email === task.createdById ||
+          //             user?.email === task.assigneeId
+          //         );
 
-          {(() => {
-            const filtered = filterTasks(tasks);
-            const userTasks = filtered.filter(
-              (task) =>
-                user?.email === task.createdById ||
-                user?.email === task.assigneeId
-            );
-            return userTasks.length === 0 ? (
-              <Typography color="gray">No tasks available</Typography>
-            ) : null;
-          })()}
-        </div>
+          //         return userTasks.length > 0 ? (
+          //           userTasks.map((task) => (
+          //             <div key={task.id}>
+          //               {!isAdmin ? (
+          //                 <Link
+          //                   to={`/task/${task.id}`}
+          //                   state={{ task, isAdmin, user }}
+          //                 >
+          //                   <TaskList
+          //                     task={task}
+          //                     onEdit={() => handleOpenDialog(task)}
+          //                     onDelete={() => handleDeleteTask(task.id)}
+          //                     loggedInUser={user}
+          //                     isAdmin={isAdmin}
+          //                     assignee={task.assigneeId}
+          //                     createdBy={task.createdById}
+          //                   />
+          //                 </Link>
+          //               ) : (
+          //                 <TaskList
+          //                   task={task}
+          //                   onEdit={() => handleOpenDialog(task)}
+          //                   onDelete={() => handleDeleteTask(task.id)}
+          //                   onView={() =>
+          //                     navigate(`/task/${task.id}`, {
+          //                       state: { task, isAdmin, user },
+          //                     })
+          //                   }
+          //                   loggedInUser={user}
+          //                   isAdmin={isAdmin}
+          //                   assignee={task.assigneeId}
+          //                   createdBy={task.createdById}
+          //                 />
+          //               )}
+          //             </div>
+          //           ))
+          //         ) : (
+          //           <Typography color="gray">No tasks available</Typography>
+          //         );
+          //       })()
+          //     ) : (
+          //       <Typography color="gray">No tasks available</Typography>
+          //     )}
+          //   </div>
+          // </div>
+          <div className="text-[#404040]/50 w-full mt-50 flex justify-center items-center">
+            <h1 className="text-[10vw] sm:text-[8vw] md:text-[6vw]">
+              {"<>Coming Soon!!</>"}
+            </h1>
+          </div>
+        )}
       </div>
 
       <TaskDialog

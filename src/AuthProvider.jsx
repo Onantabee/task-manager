@@ -1,10 +1,8 @@
 import { createContext, useState, useEffect, useContext } from "react";
 import axios from "axios";
 
-// Define AuthContext separately for cleaner exports
 const AuthContext = createContext();
 
-// Custom hook for consuming AuthContext
 const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -13,7 +11,6 @@ const useAuth = () => {
   return context;
 };
 
-// AuthProvider component
 const AuthProvider = ({ children }) => {
   const storedUser = JSON.parse(sessionStorage.getItem("user")) || {
     email: null,
@@ -93,5 +90,4 @@ const AuthProvider = ({ children }) => {
   );
 };
 
-// Named exports (consistent with Fast Refresh requirements)
 export { AuthContext, AuthProvider, useAuth };

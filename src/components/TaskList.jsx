@@ -67,18 +67,18 @@ const TaskList = ({
   return (
     <Box
       sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
+        display: "grid",
         padding: "14px",
+        gridTemplateRows: "1",
+        gridTemplateColumns: "35% 10% 10% 25% 10% 10%",
         backgroundColor: "#1f1f1f",
         borderRadius: "8px",
         border: "1px solid #404040",
         width: "100%",
         transition: "all 0.3s ease",
         "& .action-button": {
-            color: "#595959",
-          },
+          color: "#595959",
+        },
         "&:hover": {
           //   backgroundColor: "#2a2a2a",
           "& .title": {
@@ -91,6 +91,10 @@ const TaskList = ({
         <Typography
           className="title"
           sx={{
+            display: "flex",
+            // justifyContent: "center",
+            alignItems: "center",
+            height: "100%",
             color: "#a6a6a6",
             fontSize: "14px",
             overflow: "hidden",
@@ -105,7 +109,16 @@ const TaskList = ({
         </Typography>
       </Box>
 
-      <Box sx={{ flex: 1, display: "flex", gap: 1 }}>
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100%",
+          gap: 1,
+        }}
+      >
         <Chip
           sx={{
             ...statusColors[taskStatus],
@@ -115,10 +128,22 @@ const TaskList = ({
           }}
           label={taskStatus}
         />
+      </Box>
+
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100%",
+          gap: 1,
+        }}
+      >
         <Chip
           sx={{
             ...priorityColors[priority],
-            minWidth: "80px",
+            minWidth: "90px",
             height: "24px",
             fontSize: "12px",
           }}
@@ -126,29 +151,50 @@ const TaskList = ({
         />
       </Box>
 
-      <Box sx={{ flex: 1, display: "flex", alignItems: "center", gap: 2 }}>
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          justifyContent: "start",
+          // backgroundColor: "red",
+          padding: "0 10px",
+          alignItems: "center",
+          height: "100%",
+          gap: 2,
+        }}
+      >
         {isAdmin ? (
           <Stack direction="row" spacing={1} alignItems="center">
             <Avatar
-            sx={{
-              bgcolor: "#C77BBF",
-              width: 28,
-              height: 28,
-              fontSize: "14px",
-            }}
-          >
-            {employeeUser.name?.charAt(0) || "U"}
-          </Avatar>
-          <Typography variant="body2" sx={{ color: "#999999" }}>
-            {employeeUser.name}
-          </Typography>
+              sx={{
+                bgcolor: "#C77BBF",
+                width: 28,
+                height: 28,
+                fontSize: "14px",
+              }}
+            >
+              {employeeUser.name?.charAt(0) || "U"}
+            </Avatar>
+            <Typography variant="body2" sx={{ color: "#999999" }}>
+              {employeeUser.name}
+            </Typography>
           </Stack>
         ) : (
           <Typography variant="body2" sx={{ color: "#999999" }}>
             {adminUser.name}
           </Typography>
         )}
-        <Divider orientation="vertical" flexItem sx={{ bgcolor: "#404040" }} />
+      </Box>
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100%",
+          gap: 2,
+        }}
+      >
         <Typography variant="body2" sx={{ color: "#999999" }}>
           {new Intl.DateTimeFormat("en-US", {
             month: "short",
@@ -159,7 +205,15 @@ const TaskList = ({
       </Box>
 
       {isAdmin && (
-        <Box sx={{ flex: 0.5, display: "flex", justifyContent: "flex-end" }}>
+        <Box
+          sx={{
+            flex: 0.5,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100%",
+          }}
+        >
           <Stack direction="row" spacing={1}>
             <Button
               onClick={onView}

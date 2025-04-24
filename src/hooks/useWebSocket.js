@@ -32,6 +32,14 @@ export default function useWebSocket() {
             console.error("Error parsing message:", error);
           }
         });
+        stompClient.subscribe("/topic/comment-update", (message) => {
+          try {
+            const updatedComment = JSON.parse(message.body);
+            setMessages((prev) => [...prev, updatedComment]);
+          } catch (error) {
+            console.error("Error parsing message:", error);
+          }
+        });
         stompClient.subscribe("/topic/task-created", (task) => {
           try {
             const newTask = JSON.parse(task.body).payload;
@@ -43,7 +51,7 @@ export default function useWebSocket() {
         stompClient.subscribe("/topic/task-deleted", (task) => {
           try {
             const deletedId = JSON.parse(task.body).payload;
-            setTasks(prev => [...prev, { id: deletedId, deleted: true }]);
+            setTasks((prev) => [...prev, { id: deletedId, deleted: true }]);
           } catch (error) {
             console.error("Error parsing message:", error);
           }
@@ -51,7 +59,7 @@ export default function useWebSocket() {
         stompClient.subscribe("/topic/task-updated", (task) => {
           try {
             const updatedTask = JSON.parse(task.body).payload;
-            setTasks(prev => [...prev, updatedTask]);
+            setTasks((prev) => [...prev, updatedTask]);
           } catch (error) {
             console.error("Error parsing task update:", error);
           }
@@ -59,7 +67,7 @@ export default function useWebSocket() {
         stompClient.subscribe("/topic/task-status-updated", (task) => {
           try {
             const updatedTaskStatus = JSON.parse(task.body).payload;
-            setTasks(prev => [...prev, updatedTaskStatus]);
+            setTasks((prev) => [...prev, updatedTaskStatus]);
           } catch (error) {
             console.error("Error parsing task update:", error);
           }
@@ -99,7 +107,7 @@ export default function useWebSocket() {
 
   // useEffect(() => {
   //   connect();
-  
+
   //   return () => {
   //     if (client) {
   //       client.deactivate();

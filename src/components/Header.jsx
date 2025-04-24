@@ -25,7 +25,8 @@ import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import { useAuth } from "../AuthProvider";
 import { useLocation, useNavigate } from "react-router-dom";
-import { LogOut, Search, X } from "lucide-react";
+import { LogOut, PenSquare, Search, X } from "lucide-react";
+import Profile from "./Profile";
 
 const Header = ({ setIsSignup }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -43,6 +44,7 @@ const Header = ({ setIsSignup }) => {
   const navigate = useNavigate();
   const profileRef = useRef(null);
   const location = useLocation();
+  const [editProfileOpen, setEditProfileOpen] = useState(false);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -92,9 +94,59 @@ const Header = ({ setIsSignup }) => {
   }, []);
 
   const fullName = String(userName);
-  const names = fullName.split(/\s+/)
+  const names = fullName.split(/\s+/);
   const firstName = names[0];
   const lastName = names[1];
+
+  const handleEditProfileClick = () => {
+    console.log("opened");
+    setEditProfileOpen(!editProfileOpen);
+    setProfileDropdownOpen(false);
+  };
+
+  const editProfileDrawer = (
+    <Drawer
+      anchor="right"
+      open={editProfileOpen}
+      onClose={() => setEditProfileOpen(false)}
+      sx={{
+        width: 150,
+        flexShrink: 0,
+        "& .MuiDrawer-paper": {
+          backgroundColor: "#1E1E1E",
+          color: "#E0E0E0",
+          borderLeft: "1px solid #333",
+          padding: "20px",
+        },
+      }}
+    >
+      <div className="flex justify-between items-center mb-6">
+        <Typography variant="h6" sx={{ color: "#E0E0E0" }}>
+          Edit Profile
+        </Typography>
+        <IconButton onClick={() => setEditProfileOpen(false)}>
+          <CloseIcon className="text-gray-300" />
+        </IconButton>
+      </div>
+
+      {/* Add your edit profile form here */}
+      <div className="">
+        <div className="relative rounded-full bg-[#1E1E1E] p-5 z-40">
+          <div className="absolute -top-5 left-0 flex w-full justify-center items-center ">
+            <div className="rounded-full bg-[#1e1e1e] p-4">
+              <div className="w-16 h-16 bg-[#C77BBF] rounded-full flex justify-center items-center text-2xl">
+                <span>
+                  {firstName?.charAt(0) || "U"}
+                  {lastName?.charAt(0) || " "}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <Profile setEditProfileOpen={setEditProfileOpen}/>
+    </Drawer>
+  );
 
   const drawer = (
     <Drawer
@@ -136,7 +188,10 @@ const Header = ({ setIsSignup }) => {
                 className="profile w-15 h-15 mb-3 bg-[#C77BBF] rounded-full flex justify-center items-center text-3xl cursor-pointer"
                 onClick={toggleProfileDropdown}
               >
-                <span>{firstName?.charAt(0) || "U"}{lastName?.charAt(0) || " "}</span>
+                <span>
+                  {firstName?.charAt(0) || "U"}
+                  {lastName?.charAt(0) || " "}
+                </span>
               </div>
               <Typography
                 sx={{
@@ -233,7 +288,7 @@ const Header = ({ setIsSignup }) => {
               <div className="flex w-full justify-between items-center gap-4">
                 <div className="w-full flex justify-center items-center">
                   {location.pathname === "/home" && (
-                    <div className="flex items-center justify-center w-[30rem] transition-colors duration-300 ease-in-out border-2 border-[#404040] focus-within:border-[#8c8c8c] pl-6 pr-1 bg-[#404040] py-1 rounded-[15px]">
+                    <div className="flex items-center justify-center w-[30rem] transition-colors duration-300 ease-in-out border-2 border-[#404040] focus-within:border-[#737373] pl-6 pr-1 bg-[#404040] py-1 rounded-[15px]">
                       <input
                         type="text"
                         placeholder="Search tasks…"
@@ -256,7 +311,7 @@ const Header = ({ setIsSignup }) => {
                             size={25}
                           />
                         ) : (
-                          <Search color="#C77BBF" size={25} />
+                          <Search color="#9966ff" size={25} />
                         )}
                       </div>
                     </div>
@@ -267,7 +322,10 @@ const Header = ({ setIsSignup }) => {
                     className="profile w-10 h-10 bg-[#C77BBF] p-[23px] rounded-full flex justify-center items-center text-lg cursor-pointer"
                     onClick={toggleProfileDropdown}
                   >
-                    <span>{firstName?.charAt(0) || "U"}{lastName?.charAt(0) || " "}</span>
+                    <span>
+                      {firstName?.charAt(0) || "U"}
+                      {lastName?.charAt(0) || " "}
+                    </span>
                   </div>
                   <Popper
                     open={profileDropdownOpen}
@@ -319,8 +377,35 @@ const Header = ({ setIsSignup }) => {
                           <MenuList
                             sx={{
                               padding: 0,
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: "5px",
                             }}
                           >
+                            <MenuItem
+                              onClick={handleEditProfileClick}
+                              sx={{
+                                backgroundColor: "",
+                                color: "#808080",
+                                border: "2px solid #404040",
+                                display: "flex",
+                                textTransform: "capitalize",
+                                fontWeight: "semibold",
+                                justifyContent: "start",
+                                borderRadius: "8px",
+                                padding: "10px",
+                                gap: "10px",
+                                transition: "all 0.2s ease-in-out",
+                                "&:hover": {
+                                  backgroundColor: "rgba(128, 128, 128, 0.2)",
+                                  color: "#a6a6a6",
+                                  borderColor: "#a6a6a6",
+                                },
+                              }}
+                            >
+                              <PenSquare size={18} />
+                              <span>Edit Profile</span>
+                            </MenuItem>
                             <MenuItem
                               onClick={handleLogoutClick}
                               sx={{
@@ -360,6 +445,9 @@ const Header = ({ setIsSignup }) => {
         {drawer}
       </AppBar>
 
+      {drawer}
+      {editProfileDrawer}
+
       <Dialog
         open={logoutDialogOpen}
         onClose={handleLogoutCancel}
@@ -393,9 +481,9 @@ const Header = ({ setIsSignup }) => {
           <Button
             variant="contained"
             onClick={handleLogoutCancel}
-            sx={{ 
-              backgroundColor: "#404040", 
-              color: "#E0E0E0" ,
+            sx={{
+              backgroundColor: "#404040",
+              color: "#E0E0E0",
               borderRadius: "8px",
               boxShadow: "none",
               "&:hover": {

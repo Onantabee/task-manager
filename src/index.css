@@ -9,6 +9,7 @@ body, html {
 
 body {
   background-color: #1a1a1a;
+  /* color: #c77bbf8b; */
 }
 
 main {
@@ -20,27 +21,16 @@ main {
   text-shadow: 1px #1a1a1a;
 }
 
-.select {
-  position: relative;
-  z-index: 10;
-}
-
-.select option {
-  position: relative;
-  background-color: white;
-  color: black;
-  padding: 10px;
-}
 
 .select {
-  appearance: none; /* Removes default arrow */
+  appearance: none;
   -webkit-appearance: none; 
   -moz-appearance: none;
   background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='white'><path d='M5.5 7l4.5 4.5L14.5 7'/></svg>");
   background-repeat: no-repeat;
   background-position: right 10px center;
   background-size: 12px;
-  padding-right: 30px; /* Ensure space for custom arrow */
+  padding-right: 30px;
 }
 
 .custom-select {
@@ -56,10 +46,10 @@ main {
 }
 
 .custom-select::after {
-  content: "▼"; /* Unicode for downward arrow */
+  content: "▼";
   font-size: 12px;
   position: absolute;
-  right: 10px;
+  right: 100px;
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
@@ -77,28 +67,86 @@ main {
   z-index: 20;
 }
 
-@media (min-width: 640px) { /* sm */
+.notification-badge:hover::after {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  border: 3px solid #ff3333;
+  border-radius: 100%;
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 1;
+}
+
+.notification-badge::after {
+  position: relative;
+  opacity: 0;
+  transform: scale(0.5);
+}
+
+.notification-badge:not(:hover)::after {
+  opacity: 0;
+  transform: scale(0.5);
+}
+
+input[type="date"]::-webkit-datetime-edit {
+  color: #d9d9d9;
+}
+
+input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+  background: #4d4d4d;
+}
+
+input[type="date"]::-webkit-datetime-edit-text {
+  color: #d9d9d9;
+  padding: 0 0.2em;
+}
+
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+  color: #d9d9d9;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
+  cursor: pointer;
+}
+
+input[type="date"]::-webkit-inner-spin-button {
+  display: none;
+}
+
+input[type="date"] {
+  color-scheme: dark;
+}
+
+@media (min-width: 640px) {
   main {
     padding-left: 2rem; 
     padding-right: 2rem;
   }
 }
 
-@media (min-width: 768px) { /* md */
+@media (min-width: 768px) {
   main {
     padding-left: 3rem;
     padding-right: 3rem;
   }
 }
 
-@media (min-width: 1024px) { /* lg */
+@media (min-width: 1024px) {
   main {
     padding-left: 4rem; 
     padding-right: 4rem;
   }
 }
 
-@media (min-width: 1280px) { /* xl */
+@media (min-width: 1280px) {
   main {
     padding-left: 8rem;
     padding-right: 8rem;

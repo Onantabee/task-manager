@@ -13,14 +13,18 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import useWebSocket from "../hooks/useWebSocket";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs from "dayjs";
 
 const sxStyles = {
   "& .MuiOutlinedInput-root": {
-    "&.Mui-focused fieldset": { borderColor: "#C77BBF" },
-    "& fieldset": { borderWidth: "2px", borderColor: "#666666" },
-    "&:hover fieldset": { borderColor: "#C77BBF", borderWidth: "2px" },
-    backgroundColor: "#4d4d4d",
-    borderRadius: "10px",
+    "&.Mui-focused fieldset": { borderColor: "#C77BBF", borderWidth: "1px" },
+    "& fieldset": { borderWidth: "1px", borderColor: "#666666" },
+    "&:hover fieldset": { borderColor: "#C77BBF", borderWidth: "1px" },
+    backgroundColor: "rgba(77, 77, 77, 0.4)",
+    borderRadius: "16px",
   },
   "& .MuiInputLabel-root.Mui-focused": { color: "#C77BBF" },
 };
@@ -30,7 +34,7 @@ const TaskDialog = ({
   onClose,
   task,
   user,
-  nonAdminUsers = [], 
+  nonAdminUsers = [],
   fetchTasks,
   showSnackbar,
 }) => {
@@ -42,8 +46,6 @@ const TaskDialog = ({
     taskStatus: "PENDING",
     assigneeId: "",
   });
-
-  const { sendTask, sendTaskUpdate } = useWebSocket();
 
   useEffect(() => {
     if (!open) {
@@ -83,7 +85,10 @@ const TaskDialog = ({
         createdById: user.email,
       };
 
-      const res = await axios.post("http://localhost:8080/task/create-task", taskData);
+      const res = await axios.post(
+        "http://localhost:8080/task/create-task",
+        taskData
+      );
       showSnackbar("Task created successfully!", "success");
       fetchTasks();
       onClose();
@@ -119,11 +124,11 @@ const TaskDialog = ({
       fullWidth
       sx={{
         "& .MuiBackdrop-root": {
-          backgroundColor: "hsla(0, 0%, 0%, 0.5)"
+          backgroundColor: "hsla(0, 0%, 0%, 0.5)",
         },
         "& .MuiPaper-root": {
-          backgroundColor: "#0d0d0d",
-          borderRadius: "15px"
+          backgroundColor: "black",
+          borderRadius: "15px",
         },
       }}
     >
@@ -182,18 +187,19 @@ const TaskDialog = ({
                 value={taskDetails.priority}
                 onChange={handleChange}
                 sx={{
-                  borderRadius: "10px",
-                  backgroundColor: "#4d4d4d",
+                  borderRadius: "16px",
+                  backgroundColor: "rgba(77, 77, 77, 0.4)",
                   "& .MuiOutlinedInput-notchedOutline": {
                     borderColor: "#666666",
-                    borderWidth: "2px",
+                    borderWidth: "1px",
                   },
                   "&:hover .MuiOutlinedInput-notchedOutline": {
                     borderColor: "#C77BBF !important",
-                    borderWidth: "2px",
+                    borderWidth: "1px",
                   },
                   "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                     borderColor: "#C77BBF",
+                    borderWidth: "1px",
                   },
                 }}
               >
@@ -221,18 +227,19 @@ const TaskDialog = ({
                 value={taskDetails.taskStatus}
                 onChange={handleChange}
                 sx={{
-                  borderRadius: "10px",
-                  backgroundColor: "#4d4d4d",
+                  borderRadius: "16px",
+                  backgroundColor: "rgba(77, 77, 77, 0.4)",
                   "& .MuiOutlinedInput-notchedOutline": {
                     borderColor: "#666666",
-                    borderWidth: "2px",
+                    borderWidth: "1px",
                   },
                   "&:hover .MuiOutlinedInput-notchedOutline": {
                     borderColor: "#C77BBF !important",
-                    borderWidth: "2px",
+                    borderWidth: "1px",
                   },
                   "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                     borderColor: "#C77BBF",
+                    borderWidth: "1px",
                   },
                 }}
               >
@@ -244,18 +251,100 @@ const TaskDialog = ({
             </FormControl>
           </div>
         </div>
-        <TextField
-          margin="dense"
-          label="Due Date"
-          name="dueDate"
-          type="date"
-          fullWidth
-          InputLabelProps={{ shrink: true }}
-          value={taskDetails.dueDate}
-          onChange={handleChange}
-          onClick={(e) => e.target.showPicker && e.target.showPicker()}
-          sx={sxStyles}
-        />
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DatePicker
+            label="Due Date"
+            value={taskDetails.dueDate ? dayjs(taskDetails.dueDate) : null}
+            onChange={(newValue) => {
+              handleChange({
+                target: {
+                  name: "dueDate",
+                  value: newValue ? newValue.format("YYYY-MM-DD") : "",
+                },
+              });
+            }}
+            // minDate={dayjs()}
+            sx={{
+              width: "100%",
+              backgroundColor: "rgba(77, 77, 77, 0.4)",
+              borderRadius: "16px",
+              "& fieldset": {
+                borderColor: "#666666",
+                borderWidth: "1px",
+                borderRadius: "16px",
+              },
+              "&:hover fieldset": {
+                borderColor: "#C77BBF !important",
+                borderWidth: "1px",
+              },
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "16px",
+                backgroundColor: "#4d4d4d",
+                cursor: "pointer",
+                "&:hover fieldset": {
+                  borderColor: "#C77BBF",
+                  borderWidth: "1px",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#C77BBF",
+                  borderWidth: "1px",
+                },
+                "& input": {
+                  cursor: "pointer",
+                  caretColor: "transparent",
+                },
+              },
+              "& .MuiInputLabel-root": {
+                color: "#a6a6a6",
+                "&.Mui-focused": {
+                  color: "#C77BBF",
+                },
+              },
+              "& .MuiInputAdornment-root": {
+                "& button": {
+                  pointerEvents: "none", // Allows clicks to pass through to parent
+                },
+              },
+            }}
+            slotProps={{
+              textField: {
+                margin: "dense",
+                onClick: (e) => {
+                  // Find and click the calendar button when field is clicked
+                  const button = e.currentTarget.querySelector(
+                    ".MuiInputAdornment-root button"
+                  );
+                  if (button) button.click();
+                },
+              },
+              popper: {
+                sx: {
+                  "& .MuiPaper-root": {
+                    borderRadius: "16px",
+                    backgroundColor: "#333333",
+                    color: "#d9d9d9",
+                    border: "2px solid #666666",
+                    "& .MuiPickersDay-root": {
+                      color: "#d9d9d9",
+                      "&.Mui-selected": {
+                        backgroundColor: "#C77BBF",
+                      },
+                      "&.Mui-disabled": {
+                        color: "#666666",
+                      },
+                    },
+                    "& .MuiPickersCalendarHeader-label": {
+                      color: "#d9d9d9",
+                    },
+                    "& .MuiIconButton-root": {
+                      color: "#C77BBF",
+                    },
+                  },
+                },
+              },
+            }}
+          />
+        </LocalizationProvider>
         <div className="w-full">
           <Typography
             className="text-gray-300"
@@ -275,22 +364,22 @@ const TaskDialog = ({
               value={taskDetails.assigneeId || ""}
               onChange={handleChange}
               sx={{
-                borderRadius: "10px",
-                backgroundColor: "#4d4d4d",
+                borderRadius: "16px",
+                backgroundColor: "rgba(77, 77, 77, 0.4)",
                 "& .MuiOutlinedInput-notchedOutline": {
                   borderColor: "#666666",
-                  borderWidth: "2px",
+                  borderWidth: "1px",
                 },
                 "&:hover .MuiOutlinedInput-notchedOutline": {
                   borderColor: "#C77BBF !important",
-                  borderWidth: "2px",
+                  borderWidth: "1px",
                 },
                 "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                   borderColor: "#C77BBF",
+                  borderWidth: "1px",
                 },
               }}
             >
-              
               {Array.isArray(nonAdminUsers) && nonAdminUsers.length > 0 ? (
                 nonAdminUsers.map((user) => (
                   <MenuItem key={user.email} value={user.email}>
@@ -305,16 +394,16 @@ const TaskDialog = ({
             </Select>
           </FormControl>
         </div>
-        <DialogActions sx={{padding: "20px 0 0"}}>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={task ? handleUpdate : handleSave}
-        >
-          {task ? "Update" : "Save"}
-        </Button>
-      </DialogActions>
+        <DialogActions sx={{ padding: "20px 0 0" }}>
+          <Button onClick={onClose}>Cancel</Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={task ? handleUpdate : handleSave}
+          >
+            {task ? "Update" : "Save"}
+          </Button>
+        </DialogActions>
       </DialogContent>
     </Dialog>
   );

@@ -84,7 +84,7 @@ const Form = ({ isSignup }) => {
       console.error("Signup failed:", error.response?.data || error.message);
 
       const errorMessage =
-        error.response?.data?.message || "Invalid credentials";
+        error.response?.data?.message || "Couldn't Connect to Server";
 
       setSnackbarMessage(errorMessage);
       setSnackbarSeverity("error");
@@ -120,7 +120,7 @@ const Form = ({ isSignup }) => {
       console.error("Login failed:", error.response?.data || error.message);
 
       const errorMessage =
-        error.response?.data?.message || "Invalid credentials";
+        error.response?.data?.message || "Couldn't Connect to Server";
 
       setSnackbarMessage(errorMessage);
       setSnackbarSeverity("error");
