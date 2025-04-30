@@ -122,7 +122,7 @@ const Header = ({ setIsSignup }) => {
     >
       <div className="flex justify-between items-center mb-6">
         <Typography variant="h6" sx={{ color: "#E0E0E0" }}>
-          Edit Profile
+          Profile
         </Typography>
         <IconButton onClick={() => setEditProfileOpen(false)}>
           <CloseIcon className="text-gray-300" />
@@ -144,7 +144,7 @@ const Header = ({ setIsSignup }) => {
           </div>
         </div>
       </div>
-      <Profile setEditProfileOpen={setEditProfileOpen}/>
+      <Profile setEditProfileOpen={setEditProfileOpen} />
     </Drawer>
   );
 
@@ -225,11 +225,45 @@ const Header = ({ setIsSignup }) => {
                 height: "2px",
               }}
             />
-            <ListItem disablePadding>
+            <ListItem
+              disablePadding
+              sx={{
+                display: "flex",
+                width: "100%",
+                gap: "10px",
+                flexDirection: "column",
+              }}
+            >
+              <ListItemButton
+                onClick={handleEditProfileClick}
+                sx={{
+                  backgroundColor: "",
+                  color: "#808080",
+                  border: "2px solid #404040",
+                  width: "100%",
+                  display: "flex",
+                  textTransform: "capitalize",
+                  fontWeight: "semibold",
+                  justifyContent: "start",
+                  borderRadius: "8px",
+                  padding: "10px",
+                  gap: "10px",
+                  transition: "all 0.2s ease-in-out",
+                  "&:hover": {
+                    backgroundColor: "rgba(128, 128, 128, 0.2)",
+                    color: "#a6a6a6",
+                    borderColor: "#a6a6a6",
+                  },
+                }}
+              >
+                <PenSquare size={18} />
+                <span>Edit Profile</span>
+              </ListItemButton>
               <ListItemButton
                 sx={{
                   backgroundColor: "#ff3333",
                   borderRadius: "8px",
+                  width: "100%",
                   display: "flex",
                   gap: "10px",
                   transition: "all 0.3s ease-in-out",

@@ -128,7 +128,6 @@ export default function Profile({setEditProfileOpen}) {
     try {
       const res = await axios.put(`http://localhost:8080/users/update/${userEmail}`, {
         name: userDetails.name,
-        userRole: userDetails.userRole,
       });
       showSnackbar("User profile updated.", "success");
       // setEditProfileOpen(false)
@@ -179,7 +178,9 @@ export default function Profile({setEditProfileOpen}) {
     <ThemeProvider theme={darkTheme}>
       <Box
         sx={{
-          minWidth: "500px",
+          minWidth: "320px",
+          width: "500px",
+          maxWidth: "500px",
           margin: "0 auto",
           padding: "24px",
           backgroundColor: "#2A2A2A",
@@ -189,6 +190,7 @@ export default function Profile({setEditProfileOpen}) {
           position: "relative",
           minHeight: "500px",
         }}
+        
       >
         <Typography
           variant="h5"
@@ -244,60 +246,6 @@ export default function Profile({setEditProfileOpen}) {
               onChange={handleChange}
               sx={sxStyles}
             />
-          </Box>
-
-          <Divider sx={{ borderColor: "#404040", my: 1 }} />
-
-          <Box sx={{ mb: 1 }}>
-            <Typography
-              variant="subtitle1"
-              sx={{
-                color: "#C77BBF",
-                mb: 2,
-                fontSize: "16px",
-                fontWeight: "500",
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-              }}
-            >
-              Account Role
-            </Typography>
-
-            <FormControl fullWidth>
-              <Select
-                name="userRole"
-                value={userDetails.userRole}
-                onChange={handleChange}
-                sx={{
-                  borderRadius: "16px",
-                  backgroundColor: "rgba(77, 77, 77, 0.4)",
-                  color: "#ffffff",
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#666666",
-                    borderWidth: "1px",
-                  },
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#C77BBF !important",
-                    borderWidth: "1px",
-                  },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#C77BBF",
-                    backgroundColor: "rgba(199, 123, 191, 0.1)",
-                    borderWidth: "1px",
-                  },
-                  "& .MuiSelect-icon": {
-                    color: "#ffffff",
-                  },
-                  "&.Mui-focused .MuiSelect-icon": {
-                    color: "#ffffff ",
-                  },
-                }}
-              >
-                <MenuItem value="ADMIN">ADMIN</MenuItem>
-                <MenuItem value="EMPLOYEE">EMPLOYEE</MenuItem>
-              </Select>
-            </FormControl>
           </Box>
         </Box>
 

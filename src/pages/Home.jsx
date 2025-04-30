@@ -90,7 +90,7 @@ export default function Home() {
 
   useEffect(() => {
     return () => {
-      setSearchTerm(""); // Clear search when leaving the page
+      setSearchTerm(""); 
     };
   }, []);
 
