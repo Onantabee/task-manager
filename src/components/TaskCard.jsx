@@ -228,19 +228,19 @@ const TaskCard = ({
   const dueDateStatusConfig = {
     OVERDUE: {
       text: "Overdue",
-      className: "bg-[#666666]/30 border-[#808080] text-[#bfbfbf]",
+      className: "bg-[#666666]/30 border-[#808080]/50 text-[#bfbfbf]",
     },
     DUE_TODAY: {
       text: "Due",
-      className: "bg-[#ff0000]/30 border-[#ff0000] text-[#ff9999]",
+      className: "bg-[#ff0000]/30 border-[#ff0000]/50 text-[#ff9999]",
     },
     DUE_TOMORROW: {
       text: "Due Tomorrow",
-      className: "bg-[#805300]/30 border-[#805300] text-[#ffa600]",
+      className: "bg-[#805300]/30 border-[#805300]/50 text-[#ffa600]",
     },
     DUE_IN_2_DAYS: {
       text: "Due in 2 Days",
-      className: "bg-[#808000]/30 border-[#808000] text-[#cccc00]",
+      className: "bg-[#808000]/30 border-[#808000]/50 text-[#cccc00]",
     },
   };
 
@@ -301,15 +301,15 @@ const TaskCard = ({
           transition: "transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out",
           border:
             taskStatus === "COMPLETED"
-              ? "2px solid rgba(34, 197, 94, 0.7)"
+              ? "2px solid rgba(34, 197, 94, 0.3)"
               : taskStatus === "CANCELLED"
-              ? "2px solid rgba(64, 64, 64, 0.7)"
+              ? "2px solid rgba(64, 64, 64, 0.3)"
               : dueDateStatus === "DUE_TODAY"
-              ? "2px solid rgba(255, 0, 0, 0.7)"
+              ? "2px solid rgba(255, 0, 0, 0.3)"
               : dueDateStatus === "DUE_TOMORROW"
-              ? "2px solid rgba(128, 83, 0, 0.7)"
+              ? "2px solid rgba(128, 83, 0, 0.3)"
               : dueDateStatus === "DUE_IN_2_DAYS"
-              ? "2px solid rgba(128, 128, 0, 0.7)"
+              ? "2px solid rgba(128, 128, 0, 0.3)"
               : "2px solid #404040",
           "&:hover": {
             "& .action-button": {
@@ -543,7 +543,7 @@ const TaskCard = ({
         aria-describedby="logout-dialog-description"
         sx={{
           "& .MuiDialog-paper": {
-            backgroundColor: "#2A2A2A",
+            backgroundColor: "#000000",
             borderRadius: "15px",
             minWidth: "250px",
             width: "400px",
@@ -562,7 +562,7 @@ const TaskCard = ({
             id="logout-dialog-description"
             sx={{ color: "#E0E0E0" }}
           >
-            You are about to delete a task
+            You are about to delete a task.
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ padding: "24px" }}>

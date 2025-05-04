@@ -25,7 +25,7 @@ import {
 import axios from "axios";
 import { useAuth } from "../AuthProvider";
 
-export default function Profile({setEditProfileOpen}) {
+export default function Profile({ setEditProfileOpen }) {
   const darkTheme = createTheme({
     palette: {
       mode: "dark",
@@ -69,6 +69,7 @@ export default function Profile({setEditProfileOpen}) {
 
   const sxStyles = {
     backgroundColor: "rgba(77, 77, 77, 0.4)",
+    textTransform: "capitalize",
     borderRadius: "16px",
     "& .MuiOutlinedInput-root": {
       color: "#E0E0E0",
@@ -124,10 +125,18 @@ export default function Profile({setEditProfileOpen}) {
     fetchData();
   }, [userEmail]);
 
+  const capitalizeWords = (str) => {
+    return str
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+  };
+
   const handleUpdateProfile = async () => {
+    const trimmedName = userDetails.name.trim();
     try {
-      const res = await axios.put(`http://localhost:8080/users/update/${userEmail}`, {
-        name: userDetails.name,
+      await axios.put(`http://localhost:8080/users/update/${userEmail}`, {
+        name: capitalizeWords(trimmedName),
       });
       showSnackbar("User profile updated.", "success");
       // setEditProfileOpen(false)
@@ -143,7 +152,7 @@ export default function Profile({setEditProfileOpen}) {
         !passwordDetails.newPassword ||
         !passwordDetails.confirmPassword
       ) {
-        showSnackbar("All password fields are required", "error" );
+        showSnackbar("All password fields are required", "error");
         return;
       }
       if (passwordDetails.newPassword.length < 6) {
@@ -170,9 +179,9 @@ export default function Profile({setEditProfileOpen}) {
       });
       showSnackbar(res.data, "success");
     } catch (error) {
-        showSnackbar(error.response.data.message, "error");
-      }
-    };
+      showSnackbar(error.response.data.message, "error");
+    }
+  };
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -190,7 +199,6 @@ export default function Profile({setEditProfileOpen}) {
           position: "relative",
           minHeight: "500px",
         }}
-        
       >
         <Typography
           variant="h5"

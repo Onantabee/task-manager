@@ -6,6 +6,7 @@ import {
   Typography,
   Snackbar,
   Alert,
+  Slide,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import TaskCard from "../components/TaskCard.jsx";
@@ -60,7 +61,7 @@ export default function Home() {
         await fetchTasks();
       } catch (error) {
         console.error("Error fetching data:", error);
-        showSnackbar("Failed to fetch data. Please try again.", "error");
+        showSnackbar(error.response.data.message, "error");
       }
     };
 
@@ -90,7 +91,7 @@ export default function Home() {
 
   useEffect(() => {
     return () => {
-      setSearchTerm(""); 
+      setSearchTerm("");
     };
   }, []);
 
@@ -102,7 +103,7 @@ export default function Home() {
       }
     } catch (error) {
       console.error("Error fetching tasks:", error);
-      showSnackbar("Failed to fetch tasks. Please try again.", "error");
+      showSnackbar(error.response.data.message, "error");
     }
   };
 
@@ -131,7 +132,7 @@ export default function Home() {
     } catch (error) {
       fetchTasks();
       console.error("Error deleting task:", error);
-      showSnackbar("Failed to delete task. Please try again.", "error");
+      showSnackbar(error.response.data.message, "error");
     }
   };
 
@@ -388,7 +389,7 @@ export default function Home() {
         showSnackbar={showSnackbar}
       />
 
-      <Snackbar
+      {/* <Snackbar
         open={snackbarOpen}
         autoHideDuration={6000}
         onClose={() => setSnackbarOpen(false)}
@@ -397,6 +398,24 @@ export default function Home() {
           onClose={() => setSnackbarOpen(false)}
           severity={snackbarSeverity}
           sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar> */}
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        TransitionComponent={Slide}
+        TransitionProps={{ direction: "up" }}
+        sx={{ position: "absolute" }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarSeverity}
+          sx={{ width: "100%", borderRadius: "16px" }}
         >
           {snackbarMessage}
         </Alert>

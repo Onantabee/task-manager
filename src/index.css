@@ -125,6 +125,11 @@ input[type="date"] {
   color-scheme: dark;
 }
 
+.page-logo {
+  justify-content: center;
+  align-items: center;
+}
+
 @media (min-width: 640px) {
   main {
     padding-left: 2rem; 
@@ -137,6 +142,9 @@ input[type="date"] {
     padding-left: 3rem;
     padding-right: 3rem;
   }
+  .page-logo {
+    justify-content: center;
+  }
 }
 
 @media (min-width: 1024px) {
@@ -144,11 +152,18 @@ input[type="date"] {
     padding-left: 4rem; 
     padding-right: 4rem;
   }
+
+  .page-logo {
+    justify-content: flex-start;
+  }
 }
 
 @media (min-width: 1280px) {
   main {
     padding-left: 8rem;
     padding-right: 8rem;
+  }
+  .page-logo {
+    justify-content: center;
   }
 }

@@ -94,7 +94,7 @@ const TaskDialog = ({
       onClose();
     } catch (error) {
       console.error("Error creating task:", error);
-      showSnackbar("Failed to create task. Please try again.", "error");
+      showSnackbar(error.response.data.message, "error");
     }
   };
 
@@ -113,7 +113,7 @@ const TaskDialog = ({
       onClose();
     } catch (error) {
       console.error("Error updating task:", error);
-      showSnackbar("Failed to update task. Please try again.", "error");
+      showSnackbar(error.response.data.message, "error");
     }
   };
 
@@ -394,12 +394,39 @@ const TaskDialog = ({
             </Select>
           </FormControl>
         </div>
-        <DialogActions sx={{ padding: "20px 0 0" }}>
-          <Button onClick={onClose}>Cancel</Button>
+        <DialogActions sx={{ padding: "20px 0 0", display: "flex", gap: "10px" }}>
+          <Button
+            sx={{
+              backgroundColor: "#404040",
+              color: "#E0E0E0",
+              borderRadius: "8px",
+              outline: "3px solid #404040",
+              boxShadow: "none",
+              "&:hover": {
+                backgroundColor: "#4d4d4d",
+                boxShadow: "none",
+              },
+            }}
+            onClick={onClose}
+          >
+            Cancel
+          </Button>
           <Button
             variant="contained"
-            color="primary"
             onClick={task ? handleUpdate : handleSave}
+            autoFocus
+            sx={{
+              backgroundColor: "rgb(102, 194, 255)",
+              color: "#262626",
+              borderRadius: "8px",
+              outline: "3px solid rgb(102, 194, 255)",
+              boxShadow: "none",
+              "&:hover": {
+                backgroundColor: "#4db8ff",
+                color: "#1a1a1a",
+                boxShadow: "none",
+              },
+            }}
           >
             {task ? "Update" : "Save"}
           </Button>

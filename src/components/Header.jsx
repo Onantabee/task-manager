@@ -202,7 +202,7 @@ const Header = ({ setIsSignup }) => {
                   justifyContent: "center",
                 }}
               >
-                {userName}
+                {userName ? userName : "User"}
               </Typography>
               {isAdmin && (
                 <Typography
@@ -292,17 +292,27 @@ const Header = ({ setIsSignup }) => {
       >
         <Toolbar sx={{ padding: "0 !important" }}>
           <div className="w-full justify-center max-w-[1240px] mx-auto items-center hidden md:flex space-x-4 gap-4">
-            <h1 className="text-xl font-bold text-gray-500 w-fit">Rhine</h1>
+            <div>
+              <h1 className="text-2xl text-[#808080] font-semibold">Rhine</h1>
+            </div>
             {!isLoggedIn ? (
-              <div className="w-full flex justify-end gap-5">
+              <div className="w-full flex justify-end gap-3">
                 <Button
                   variant="contained"
                   sx={{
-                    backgroundColor: "white",
-                    color: "black",
-                    padding: "10px 20px",
+                    backgroundColor: "hsla(0, 0%, 45%, 0.8)",
+                    color: "#E0E0E0",
+                    borderRadius: "8px",
+                    // border: "2px solid #4db8ff",
+                    // outline: "4px solid rgba(102, 194, 255, 0.4)",
+                    boxShadow: "none",
+                    "&:hover": {
+                      backgroundColor: "hsla(0, 0%, 45%, 0.5)",
+                      boxShadow: "none",
+                    },
                   }}
                   onClick={() => {
+                    navigate("/");
                     setIsSignup(false);
                   }}
                 >
@@ -310,8 +320,20 @@ const Header = ({ setIsSignup }) => {
                 </Button>
                 <Button
                   variant="contained"
-                  sx={{ backgroundColor: "#6A4C9C" }}
+                  sx={{
+                    backgroundColor: "hsla(260, 100%, 70%, 0.8)",
+                    color: "#E0E0E0",
+                    borderRadius: "8px",
+                    // border: "2px solid #4db8ff",
+                    // outline: "4px solid rgba(102, 194, 255, 0.4)",
+                    boxShadow: "none",
+                    "&:hover": {
+                      backgroundColor: "hsla(260, 100%, 70%, 0.5)",
+                      boxShadow: "none",
+                    },
+                  }}
                   onClick={() => {
+                    navigate("/");
                     setIsSignup(true);
                   }}
                 >
@@ -393,7 +415,7 @@ const Header = ({ setIsSignup }) => {
                               ...(!isAdmin && { marginBottom: "10px" }),
                             }}
                           >
-                            {userName}
+                            {userName ? userName : "User"}
                           </Typography>
                           {isAdmin && (
                             <Typography
