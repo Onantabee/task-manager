@@ -118,13 +118,10 @@ const ChooseRole = () => {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1 }}
               >
-                <div className="flex flex-col justify-center items-center bg-gradient-to-r border-2 border-[#9966ff]/50 from-[#220066]/5 to-[#9966ff]/5 backdrop-blur-2xl py-5 px-12 rounded-2xl">
+                <div className="flex flex-col justify-center items-center py-5 px-12 rounded-2xl">
                   <h1 className="text-4xl text-[#9966ff] font-semibold">
                     Rhine
                   </h1>
-                  <p className="font-semibold text-[#808080]">
-                    . .Task Manger. .
-                  </p>
                 </div>
               </motion.div>
               <Typography

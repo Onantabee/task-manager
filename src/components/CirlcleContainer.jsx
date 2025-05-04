@@ -82,7 +82,7 @@ const CircleContainer = () => (
       animate={{ opacity: 1 }}
       transition={{ delay: 1 }}
     >
-      <div className="flex flex-col justify-center items-center bg-gradient-to-r border-2 border-[#9966ff] from-[#220066]/10 to-[#9966ff]/10 backdrop-blur-2xl p-5 rounded-2xl">
+      <div className="flex flex-col justify-center items-center bg-gradient-to-t border-[1px] border-[#9966ff] from-[#220066]/3 to-[#9966ff]/3 backdrop-blur-2xl p-5 rounded-2xl">
         <h1 className="text-8xl text-[#9966ff] font-semibold">Rhine</h1>
         <p className="text-2xl font-semibold text-[#a6a6a6]">. .Task Manger. .</p>
       </div>
